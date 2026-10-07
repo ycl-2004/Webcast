@@ -49,6 +49,14 @@ Read-only `devicectl` checks after the phone was reconnected:
 - Listing `Library/Logs` failed because no such directory was available; the parent Library listing filtered by Logs succeeded with **0 files**. Source confirms Release disables detailed GCK output and has no persistent application log writer, so the previous playback cannot be reconstructed from app logs.
 - No source behavior changed in this follow-up; the existing 20/20 test result applies. JS syntax, plist lint, diff whitespace and documentation-link checks were repeated. A credential-pattern scan found no private keys or common access-token patterns in commit candidates. Local signing/device settings, the .app and temporary device JSON outputs remain outside Git.
 
+## App icon phone update
+
+On 2026-10-07 the user requested the new watercolor icon be installed on the phone. `make device-build` produced a signed Release successfully, and strict signature verification passed. The compiled device icon was decoded and visually confirmed as the new TV/play/casting artwork. `devicectl device install app` succeeded on the connected iPhone 15; an exact-bundle query confirmed `dev.yc.Webcast / 0.1.1 / 2`. The current installable package is `.build-device/Build/Products/Release-iphoneos/Webcast.app` (ignored by Git); the earlier `artifacts/Release/Webcast.app` package predates the icon change. Webcast was not launched and no TV commands were sent. The phone's home screen was not visually inspected. No source behavior changed, so the existing 20/20 test result was retained without rerunning the tests.
+
+## README validation
+
+The English and Traditional Chinese READMEs were rewritten using the YC README house style and verified against source/configuration, the signed Release build/install and existing 20/20 test evidence. Checked 32 local links/images/anchors; all documented Make targets passed dry-run checks, including install-only behavior. Both files rendered with GitHub's Markdown API, with navigation targets matching the rendered headings and all images carrying alt text. All five badge image URLs returned HTTP 200. Apple's current account overview confirmed Personal Team provisioning expiry. JS syntax, Info.plist lint, icon JSON parsing, diff hygiene and commit-candidate credential-pattern checks passed. No code tests were rerun for documentation and icon changes; setup on a clean Mac or another signing account remains unverified.
+
 ## Open acceptance
 
 Individual remote controls, a specified 爱壹帆 episode, lock-screen and Wi-Fi recovery remain unverified. See [feasibility](../docs/FEASIBILITY.md) and [review / cleanup evidence](review-2026-10-07.md).

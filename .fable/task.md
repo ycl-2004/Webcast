@@ -3,7 +3,7 @@
 ## Goal
 Implement the iPhone browser → video detection → Chromecast → remote MVP from PLAN.md, with observable validation and honest device acceptance status.
 
-Current follow-up: save the stabilized Release and user-confirmed television playback after read-only phone checks; resolve the missing Git remote, then commit and push.
+Current follow-up: write the YC-style English and Traditional Chinese READMEs, then commit and push the reviewed app/icon/documentation state to the user-specified repository, preserving existing history.
 
 ## Acceptance criteria and append-only requirements
 1. Follow PLAN.md: iOS 16+, SwiftUI, Chinese, Google Cast 4.8.6, Default Media Receiver, XcodeGen.
@@ -24,6 +24,9 @@ Current follow-up: save the stabilized Release and user-confirmed television pla
 15. Added 2026-10-07: Record the user's successful television playback report without expanding it to untested source/control/recovery scenarios.
 16. Added 2026-10-07: Read relevant logs/status from the connected phone without restarting the App or controlling the television.
 17. Added 2026-10-07: Commit and push the reviewed current state; preserve local credentials, signing/device settings and binaries outside Git. Push destination must be resolved because no remote is configured.
+18. Added 2026-10-07: Generate a phone-ready Webcast app icon matching the user's FoldPeek, Wisp, NoType and Orbit visual family, and wire it into the project.
+19. Added 2026-10-07: Update the connected phone with the newly generated app icon; retain the no-launch/no-TV-command boundary.
+20. Added 2026-10-07: Apply yc-readme, complete the README, and commit/push to https://github.com/ycl-2004/Webcast.git on main. Preserve existing commits and keep credentials, local signing/device settings and binary build products outside Git.
 
 ## Decisions
 - No existing source or Git repository; PLAN.md is the approved spec.
@@ -33,6 +36,7 @@ Current follow-up: save the stabilized Release and user-confirmed television pla
 - Validation uses an explicit offline launch environment that does not initialize the Cast SDK, preventing automatic reconnection as well as deliberate connection.
 
 ## Evidence
+- README follow-up (requirement 20): completed English README.md and Traditional Chinese README.zh-TW.md from current source/configuration and existing validation evidence. Checked 32 local links/images/anchors; verified version, dependency, platform and all eight documented Make targets; validated GitHub HTML formatting and navigation targets; five badge URLs returned HTTP 200. Apple Personal Team expiration was checked against Apple's current account overview. JS syntax, Info.plist, icon JSON, diff whitespace and credential-pattern checks passed. No app behavior changed, so the recorded 20/20 tests and this session's signed Release build/install evidence were reused.
 - 2026-10-07: Xcode 27.0 and XcodeGen available. XcodeBuildMCP lists iOS 18.6 and 26.5 simulators.
 - Browser page https://www.iyf.tv/play/qXvszbfSdq5: title 仙逆-01; video currentSrc is blob. Observed playlist host sss8-e1.pipecdn.vip; signed query is intentionally not committed.
 - curl response: HTTP 403, Server cloudflare, HTML response; /private/tmp/webcast-iyf-headers.txt (temporary local evidence).
@@ -53,7 +57,9 @@ Current follow-up: save the stabilized Release and user-confirmed television pla
 - Follow-up changes are documentation only; reused the unchanged 20/20 code test result and repeated scoped static/package/diff checks before saving.
 
 ## Outstanding
+- Phone icon update (requirement 19) complete: signed Release build and strict signature verification passed; the compiled icon was visually confirmed; devicectl installed the updated package on iPhone 15 successfully and exact-bundle query confirmed 0.1.1 (2). No App launch or TV command was performed. Current local package: .build-device/Build/Products/Release-iphoneos/Webcast.app. The home screen was not visually inspected.
+- App icon follow-up (requirement 18) complete: inspected all four local reference icons; generated a cream-paper watercolor TV/play/casting icon with the built-in image tool; integrated the opaque 1024 × 1024 PNG into AppIcon. Xcode asset compilation passed (exit 0), 60 px preview inspected, original icon preserved byte-for-byte, and diff hygiene passed. Prompt and evidence: artwork/appicon-prompt.md. No phone rebuild/install or App launch was performed.
 - Software implementation and simulator validation complete. make generate, JS syntax, plist lint, local documentation links and file whitespace checks passed; final regenerated project simulator build passed.
 - Follow-up requirements 7–14 complete: regression review/fixes, 爱壹帆 copy, pi investigation, scoped cleanup, signed Release install, focused UI text, and preserved no-TV-command boundary.
 - User has confirmed one actual television playback. Specific 爱壹帆 source, individual remote actions and lock-screen/Wi-Fi acceptance remain open; no-TV-command boundary remains for agent work. Personal Team weekly re-signing remains a maintenance constraint.
-- Commit/push follow-up: local commit is being prepared; destination confirmation pending because no Git remote exists.
+- Publication destination resolved by the user's explicit request: https://github.com/ycl-2004/Webcast.git, main. Read-only checks confirmed a public empty repository with Issues enabled and no published releases. Existing local main history is preserved; no duplicate title, repository reinitialization, or history replacement is needed. Final delivery must verify the pushed main commit against local HEAD.
