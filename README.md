@@ -10,6 +10,7 @@
 
 <p align="center">
   <img src="https://img.shields.io/badge/status-source%20build-111111" alt="Source build; no public binary release">
+  <img src="https://github.com/ycl-2004/Webcast/actions/workflows/ci.yml/badge.svg" alt="CI unit tests">
   <img src="https://img.shields.io/badge/iOS-16.0%2B-111111?logo=apple&amp;logoColor=white" alt="iOS 16.0 or later">
   <img src="https://img.shields.io/badge/version-0.1.1%20%282%29-111111" alt="Current build 0.1.1 (2)">
   <img src="https://img.shields.io/badge/SwiftUI-WKWebView-F05138?logo=swift&amp;logoColor=white" alt="Built with SwiftUI and WKWebView">

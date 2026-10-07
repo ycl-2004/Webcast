@@ -80,9 +80,7 @@ struct ContentView: View {
             if phase == .active { cast.refreshSession() }
             else { browser.cancelDialogs() }
         }
-        .alert("投屏提示", isPresented: Binding(get: { cast.errorMessage != nil }, set: { if !$0 { cast.errorMessage = nil } })) {
-            Button("知道了", role: .cancel) { cast.errorMessage = nil }
-        } message: { Text(cast.errorMessage ?? "") }
+        .castErrorAlert()
     }
 
     private var deviceButton: some View {

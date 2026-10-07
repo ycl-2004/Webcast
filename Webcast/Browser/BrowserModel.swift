@@ -46,11 +46,14 @@ final class BrowserModel: NSObject, ObservableObject {
         configuration.mediaTypesRequiringUserActionForPlayback = []
         configuration.websiteDataStore = dataStore ?? .default()
         webView = WKWebView(frame: .zero, configuration: configuration)
-        do { script = try VideoSniffer.scriptSource() }
-        catch { script = ""; super.init(); errorMessage = error.localizedDescription; return }
+        var sniffScript = ""
+        do { sniffScript = try VideoSniffer.scriptSource() }
+        catch {
+            // 检测脚本缺失时降级为普通浏览器，而不是让整个浏览器变白屏
+            errorMessage = "视频检测不可用（\(error.localizedDescription)），仍可正常浏览网页。"
+        }
+        script = sniffScript
         super.init()
-        configuration.userContentController.add(WeakScriptHandler(sniffer), name: "videoSniffer")
-        sniffer.prepareNavigation(controller: configuration.userContentController, source: script)
         webView.navigationDelegate = self
         webView.uiDelegate = self
         webView.allowsBackForwardNavigationGestures = true
@@ -74,9 +77,15 @@ final class BrowserModel: NSObject, ObservableObject {
         #endif
         if defaults.string(forKey: SettingsKeys.defaultPage) == "start" {
             showingStartPage = true
-        } else {
-            open(initialURL())
+            return
         }
+        guard !script.isEmpty else {
+            open(initialURL())
+            return
+        }
+        configuration.userContentController.add(WeakScriptHandler(sniffer), name: "videoSniffer")
+        sniffer.prepareNavigation(controller: configuration.userContentController, source: script)
+        open(initialURL())
     }
 
     /// 依据「浏览器打开时加载」设置决定首个页面：上次访问的页面或主页

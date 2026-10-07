@@ -10,6 +10,8 @@ struct RemoteView: View {
     @State private var editingVolume = false
     @State private var confirmStop = false
     @State private var showHelp = false
+    /// 拖动音量滑条时每 0.4s 发送一次增量，兼顾手感与避免刷爆电视端请求
+    @State private var volumeSendTask: Task<Void, Never>?
 
     /// 只有「未连接」时才能发起新连接；连接中/等待恢复期间 CTA 关闭。
     private var canStartConnection: Bool {
@@ -34,6 +36,7 @@ struct RemoteView: View {
         }
         .navigationTitle("投屏遥控").navigationBarTitleDisplayMode(.inline)
         .onAppear { seekValue = cast.position; volumeValue = cast.volume }
+        .onDisappear { volumeSendTask?.cancel(); volumeSendTask = nil }
         .onChange(of: cast.position) { if !editingSeek { seekValue = min($0, max(cast.duration, 1)) } }
         .onChange(of: cast.volume) { if !editingVolume { volumeValue = $0 } }
         .onChange(of: cast.connection) { state in
@@ -183,7 +186,24 @@ struct RemoteView: View {
                     .accessibilityLabel(cast.isMuted ? "取消静音" : "静音")
                 Slider(value: $volumeValue, in: 0...1, onEditingChanged: { editing in
                     editingVolume = editing
-                    if !editing { cast.setVolume(volumeValue) }
+                    if editing {
+                        volumeSendTask?.cancel()
+                        volumeSendTask = Task { @MainActor in
+                            var last = volumeValue
+                            while !Task.isCancelled {
+                                try? await Task.sleep(nanoseconds: 400_000_000)
+                                guard !Task.isCancelled else { break }
+                                if abs(volumeValue - last) > 0.001 {
+                                    cast.setVolume(volumeValue)
+                                    last = volumeValue
+                                }
+                            }
+                        }
+                    } else {
+                        volumeSendTask?.cancel()
+                        volumeSendTask = nil
+                        cast.setVolume(volumeValue)
+                    }
                 }).accessibilityLabel("电视音量")
             }
         }

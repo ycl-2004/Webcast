@@ -109,7 +109,10 @@ struct CandidateStore {
                 segmentFormat: payload["segmentFormat"] as? String, isDRM: payload["drm"] as? Bool ?? false,
                 observedAt: now)
         }
-        if items.count > 100, let oldest = items.values.min(by: { $0.observedAt < $1.observedAt }) { items.removeValue(forKey: oldest.id) }
+        if items.count > 100,
+           let oldest = items.values.filter({ !$0.isCurrent }).min(by: { $0.observedAt < $1.observedAt }) {
+            items.removeValue(forKey: oldest.id)
+        }
         return true
     }
 }

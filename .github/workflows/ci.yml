@@ -1,0 +1,44 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    name: Unit tests (iOS Simulator)
+    runs-on: macos-15
+    timeout-minutes: 45
+    env:
+      WEBCAST_OFFLINE_VALIDATION: "1"
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Install xcodegen
+        run: brew install xcodegen
+      - name: Generate project
+        run: make generate
+      - name: Pick a simulator
+        id: sim
+        run: |
+          SIM="$(xcrun simctl list devices available |
+            sed -nE 's/^\s*iPhone[^(:]*\(([A-F0-9-]{36})\).*/\1/p' |
+            head -1)"
+          test -n "$SIM" || { echo "No iPhone simulator found"; exit 1; }
+          echo "id=$SIM" >> "$GITHUB_OUTPUT"
+      - name: Test
+        run: |
+          set -o pipefail
+          xcodebuild -project Webcast.xcodeproj \
+            -scheme Webcast -configuration Debug \
+            -destination "platform=iOS Simulator,\
+              id=${{ steps.sim.outputs.id }}" \
+            -derivedDataPath .build \
+            SYMROOT=.build/Build/Products \
+            OBJROOT=.build/Build/Intermediates.noindex \
+            CODE_SIGNING_ALLOWED=NO test | tail -50

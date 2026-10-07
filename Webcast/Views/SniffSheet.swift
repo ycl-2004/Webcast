@@ -46,10 +46,8 @@ struct SniffSheet: View {
             }
             .navigationTitle("检测到的视频").navigationBarTitleDisplayMode(.inline)
             .toolbar { ToolbarItem(placement: .confirmationAction) { Button("完成") { dismiss() } } }
-            // sheet 盖住根视图时，ContentView 根部的 alert 不会弹出，这里补一份同样的错误提示
-            .alert("投屏提示", isPresented: Binding(get: { cast.errorMessage != nil }, set: { if !$0 { cast.errorMessage = nil } })) {
-                Button("知道了", role: .cancel) { cast.errorMessage = nil }
-            } message: { Text(cast.errorMessage ?? "") }
+            // sheet 盖住根视图时，根部的 alert 不会弹出，这里用共享 modifier 补一份同样的错误提示
+            .castErrorAlert()
         }.presentationDetents([.medium, .large])
     }
     private func badge(_ label: String) -> some View {

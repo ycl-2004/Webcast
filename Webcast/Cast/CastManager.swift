@@ -1,6 +1,7 @@
 import Foundation
 import GoogleCast
 import Combine
+import MediaPlayer
 
 enum CastConnection: Equatable {
     case disconnected, connecting, connected, suspended
@@ -30,6 +31,10 @@ final class CastManager: NSObject, ObservableObject {
     @Published private(set) var isLoading = false
     @Published private(set) var playbackLabel = "尚未播放视频"
     @Published var errorMessage: String?
+    /// 最近一次成功发起的加载请求对应的候选，供「投屏失败后一键重试」使用
+    @Published private(set) var lastLoadedCandidate: VideoCandidate?
+    /// 电视上报播放错误时可对 lastLoadedCandidate 重试
+    private(set) var canRetryLoad = false
 
     let offlineValidation: Bool
     private let context: GCKCastContext?
@@ -71,6 +76,7 @@ final class CastManager: NSObject, ObservableObject {
         refreshSession()
         if !offlineValidation {
             updateTimerState()
+            setupNowPlaying()
         }
     }
 
@@ -104,6 +110,12 @@ final class CastManager: NSObject, ObservableObject {
         refreshDevices()
     }
 
+    /// 连接建立或选择器关闭后停止扫描，避免后台持续耗电
+    func stopDiscovery() {
+        guard let context, context.discoveryManager.discoveryActive else { return }
+        context.discoveryManager.stopDiscovery()
+    }
+
     func connect(_ device: CastDevice) {
         guard let context, !offlineValidation else { return }
         errorMessage = nil
@@ -127,8 +139,17 @@ final class CastManager: NSObject, ObservableObject {
         isLoading = true
         let request = client.loadMedia(with: MediaLoader.request(for: candidate))
         loadRequest = request
+        lastLoadedCandidate = candidate
+        canRetryLoad = false
         track(request, action: "加载视频")
         return true
+    }
+
+    /// 电视加载失败后，用同一候选重试一次（签名 URL 失效需回网页重新检测）
+    @discardableResult
+    func retryLoad() -> Bool {
+        guard let candidate = lastLoadedCandidate else { return false }
+        return load(candidate)
     }
 
     func togglePlayback() {
@@ -165,6 +186,8 @@ final class CastManager: NSObject, ObservableObject {
             connection = .disconnected
             deviceName = ""
             clearPlayback()
+            requests.removeAll()
+            stopDiscoveryIfIdle()
             updateTimerState()
             return
         }
@@ -185,6 +208,8 @@ final class CastManager: NSObject, ObservableObject {
         title = ""; position = 0; duration = 0; playbackLabel = "尚未播放视频"
         loadRequest = nil; requests.removeAll()
         reportedPlaybackError = false
+        canRetryLoad = false
+        updateNowPlaying(reset: true)
     }
 
     private func updatePlayback() {
@@ -215,9 +240,17 @@ final class CastManager: NSObject, ObservableObject {
         if state == .idle && status.idleReason == .error {
             if !reportedPlaybackError {
                 errorMessage = "电视无法播放这个视频。请回到网页重新播放，再试一次。"
+                canRetryLoad = lastLoadedCandidate != nil
                 reportedPlaybackError = true
             }
         } else { reportedPlaybackError = false }
+        updateNowPlaying()
+    }
+
+    /// 连接已建立时保持扫描没有意义；空闲（未连接）时才允许停止检查
+    private func stopDiscoveryIfIdle() {
+        guard let context, context.sessionManager.currentCastSession == nil else { return }
+        stopDiscovery()
     }
 
     private func refreshDevices() {
@@ -237,9 +270,15 @@ final class CastManager: NSObject, ObservableObject {
 
 extension CastManager: @preconcurrency GCKSessionManagerListener {
     func sessionManager(_ sessionManager: GCKSessionManager, willStart session: GCKCastSession) { connection = .connecting }
-    func sessionManager(_ sessionManager: GCKSessionManager, didStart session: GCKCastSession) { refreshSession() }
+    func sessionManager(_ sessionManager: GCKSessionManager, didStart session: GCKCastSession) {
+        stopDiscovery()
+        refreshSession()
+    }
     @objc(sessionManager:didResumeCastSession:)
-    func sessionManager(_ sessionManager: GCKSessionManager, didResumeCastSession session: GCKCastSession) { refreshSession() }
+    func sessionManager(_ sessionManager: GCKSessionManager, didResumeCastSession session: GCKCastSession) {
+        stopDiscovery()
+        refreshSession()
+    }
     func sessionManager(_ sessionManager: GCKSessionManager, didSuspend session: GCKCastSession, with reason: GCKConnectionSuspendReason) {
         connection = .suspended
         updateTimerState()
@@ -281,8 +320,14 @@ extension CastManager: @preconcurrency GCKRequestDelegate {
     }
     func request(_ request: GCKRequest, didFailWithError error: GCKError) {
         let action = requests.removeValue(forKey: ObjectIdentifier(request))?.1 ?? "操作"
-        if request === loadRequest { isLoading = false; loadRequest = nil }
-        errorMessage = "\(action)失败。请检查电视连接；如果加载失败，请回到网页重新播放。"
+        let isLoad = request === loadRequest
+        if isLoad { isLoading = false; loadRequest = nil }
+        if isLoad {
+            canRetryLoad = lastLoadedCandidate != nil
+            errorMessage = "加载视频失败。请检查电视连接，或回到网页重新播放后再试。"
+        } else {
+            errorMessage = "\(action)失败。请检查电视连接。"
+        }
     }
     func request(_ request: GCKRequest, didAbortWith reason: GCKRequestAbortReason) {
         requests.removeValue(forKey: ObjectIdentifier(request))

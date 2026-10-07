@@ -41,6 +41,7 @@ targets:
         CFBundleShortVersionString: "0.1.1"
         CFBundleVersion: "2"
         WebcastBuildConfiguration: $(CONFIGURATION)
+        ITSAppUsesNonExemptEncryption: false
         LSRequiresIPhoneOS: true
         UILaunchScreen: {}
         UIApplicationSceneManifest:

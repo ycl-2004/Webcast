@@ -1,0 +1,414 @@
+{
+  "sourceLanguage" : "zh-Hans",
+  "strings" : {
+    "浏览器" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Browser" } },
+        "zh-Hant" : { "stringUnit" : { "state" : "translated", "value" : "瀏覽器" } }
+      }
+    },
+    "投屏遥控" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Cast Remote" } },
+        "zh-Hant" : { "stringUnit" : { "state" : "translated", "value" : "投放遙控" } }
+      }
+    },
+    "设置" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Settings" } },
+        "zh-Hant" : { "stringUnit" : { "state" : "translated", "value" : "設定" } }
+      }
+    },
+    "视频" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Videos" } },
+        "zh-Hant" : { "stringUnit" : { "state" : "translated", "value" : "影片" } }
+      }
+    },
+    "主页" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Home" } },
+        "zh-Hant" : { "stringUnit" : { "state" : "translated", "value" : "主頁" } }
+      }
+    },
+    "输入网址或搜索" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Enter URL or search" } },
+        "zh-Hant" : { "stringUnit" : { "state" : "translated", "value" : "輸入網址或搜尋" } }
+      }
+    },
+    "后退" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Back" } },
+        "zh-Hant" : { "stringUnit" : { "state" : "translated", "value" : "後退" } }
+      }
+    },
+    "前进" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Forward" } },
+        "zh-Hant" : { "stringUnit" : { "state" : "translated", "value" : "前進" } }
+      }
+    },
+    "打开网页，播放视频，再投到电视" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Open a page, play a video, then cast to your TV" } },
+        "zh-Hant" : { "stringUnit" : { "state" : "translated", "value" : "開啟網頁，播放影片，再投到電視" } }
+      }
+    },
+    "检测到的视频" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Detected Videos" } },
+        "zh-Hant" : { "stringUnit" : { "state" : "translated", "value" : "偵測到的影片" } }
+      }
+    },
+    "还没有检测到视频" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "No videos detected yet" } },
+        "zh-Hant" : { "stringUnit" : { "state" : "translated", "value" : "尚未偵測到影片" } }
+      }
+    },
+    "先在网页里播放视频。" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Play a video in the page first." } },
+        "zh-Hant" : { "stringUnit" : { "state" : "translated", "value" : "先在網頁裡播放影片。" } }
+      }
+    },
+    "返回网页播放" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Back to Page" } },
+        "zh-Hant" : { "stringUnit" : { "state" : "translated", "value" : "返回網頁播放" } }
+      }
+    },
+    "投到电视" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Cast to TV" } },
+        "zh-Hant" : { "stringUnit" : { "state" : "translated", "value" : "投到電視" } }
+      }
+    },
+    "选择电视后投屏" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Pick a TV to Cast" } },
+        "zh-Hant" : { "stringUnit" : { "state" : "translated", "value" : "選擇電視後投放" } }
+      }
+    },
+    "选择电视" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Choose a TV" } },
+        "zh-Hant" : { "stringUnit" : { "state" : "translated", "value" : "選擇電視" } }
+      }
+    },
+    "投屏提示" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Casting" } },
+        "zh-Hant" : { "stringUnit" : { "state" : "translated", "value" : "投放提示" } }
+      }
+    },
+    "重试投屏" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Retry Cast" } },
+        "zh-Hant" : { "stringUnit" : { "state" : "translated", "value" : "重試投放" } }
+      }
+    },
+    "知道了" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "OK" } },
+        "zh-Hant" : { "stringUnit" : { "state" : "translated", "value" : "知道了" } }
+      }
+    },
+    "完成" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Done" } },
+        "zh-Hant" : { "stringUnit" : { "state" : "translated", "value" : "完成" } }
+      }
+    },
+    "未连接电视" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "No TV connected" } },
+        "zh-Hant" : { "stringUnit" : { "state" : "translated", "value" : "未連接電視" } }
+      }
+    },
+    "正在连接…" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Connecting…" } },
+        "zh-Hant" : { "stringUnit" : { "state" : "translated", "value" : "正在連接…" } }
+      }
+    },
+    "已连接" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Connected" } },
+        "zh-Hant" : { "stringUnit" : { "state" : "translated", "value" : "已連接" } }
+      }
+    },
+    "等待恢复连接…" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Waiting to reconnect…" } },
+        "zh-Hant" : { "stringUnit" : { "state" : "translated", "value" : "等待恢復連接…" } }
+      }
+    },
+    "正在播放" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Playing" } },
+        "zh-Hant" : { "stringUnit" : { "state" : "translated", "value" : "正在播放" } }
+      }
+    },
+    "已暂停" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Paused" } },
+        "zh-Hant" : { "stringUnit" : { "state" : "translated", "value" : "已暫停" } }
+      }
+    },
+    "正在缓冲…" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Buffering…" } },
+        "zh-Hant" : { "stringUnit" : { "state" : "translated", "value" : "正在緩衝…" } }
+      }
+    },
+    "正在加载…" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Loading…" } },
+        "zh-Hant" : { "stringUnit" : { "state" : "translated", "value" : "正在載入…" } }
+      }
+    },
+    "尚未播放视频" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Nothing playing yet" } },
+        "zh-Hant" : { "stringUnit" : { "state" : "translated", "value" : "尚未播放影片" } }
+      }
+    },
+    "把网页视频放到大屏上" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Put web videos on the big screen" } },
+        "zh-Hant" : { "stringUnit" : { "state" : "translated", "value" : "把網頁影片放到大螢幕上" } }
+      }
+    },
+    "手机和电视连接同一 Wi-Fi，然后选择电视。" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Connect your phone and TV to the same Wi-Fi, then choose a TV." } },
+        "zh-Hant" : { "stringUnit" : { "state" : "translated", "value" : "手機和電視連接同一 Wi-Fi，然後選擇電視。" } }
+      }
+    },
+    "找不到电视？" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Can't find your TV?" } },
+        "zh-Hant" : { "stringUnit" : { "state" : "translated", "value" : "找不到電視？" } }
+      }
+    },
+    "断开并重试" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Disconnect and Retry" } },
+        "zh-Hant" : { "stringUnit" : { "state" : "translated", "value" : "斷開並重試" } }
+      }
+    },
+    "停止电视播放并断开连接？" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Stop TV playback and disconnect?" } },
+        "zh-Hant" : { "stringUnit" : { "state" : "translated", "value" : "停止電視播放並斷開連接？" } }
+      }
+    },
+    "停止并断开" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Stop and Disconnect" } },
+        "zh-Hant" : { "stringUnit" : { "state" : "translated", "value" : "停止並斷開" } }
+      }
+    },
+    "停止播放" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Stop" } },
+        "zh-Hant" : { "stringUnit" : { "state" : "translated", "value" : "停止播放" } }
+      }
+    },
+    "断开连接" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Disconnect" } },
+        "zh-Hant" : { "stringUnit" : { "state" : "translated", "value" : "斷開連接" } }
+      }
+    },
+    "电视音量" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "TV Volume" } },
+        "zh-Hant" : { "stringUnit" : { "state" : "translated", "value" : "電視音量" } }
+      }
+    },
+    "播放进度" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Playback Position" } },
+        "zh-Hant" : { "stringUnit" : { "state" : "translated", "value" : "播放進度" } }
+      }
+    },
+    "直播" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Live" } },
+        "zh-Hant" : { "stringUnit" : { "state" : "translated", "value" : "直播" } }
+      }
+    },
+    "默认打开" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Open On Launch" } },
+        "zh-Hant" : { "stringUnit" : { "state" : "translated", "value" : "預設開啟" } }
+      }
+    },
+    "上次位置" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Last Position" } },
+        "zh-Hant" : { "stringUnit" : { "state" : "translated", "value" : "上次位置" } }
+      }
+    },
+    "浏览器打开时加载" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Browser Loads on Launch" } },
+        "zh-Hant" : { "stringUnit" : { "state" : "translated", "value" : "瀏覽器開啟時載入" } }
+      }
+    },
+    "上次访问的页面" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Last Page" } },
+        "zh-Hant" : { "stringUnit" : { "state" : "translated", "value" : "上次造訪的頁面" } }
+      }
+    },
+    "拦截新窗口" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Block Pop-up Windows" } },
+        "zh-Hant" : { "stringUnit" : { "state" : "translated", "value" : "攔截新視窗" } }
+      }
+    },
+    "请求桌面网站" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Request Desktop Site" } },
+        "zh-Hant" : { "stringUnit" : { "state" : "translated", "value" : "請求桌面網站" } }
+      }
+    },
+    "搜索引擎" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Search Engine" } },
+        "zh-Hant" : { "stringUnit" : { "state" : "translated", "value" : "搜尋引擎" } }
+      }
+    },
+    "必应" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Bing" } },
+        "zh-Hant" : { "stringUnit" : { "state" : "translated", "value" : "Bing" } }
+      }
+    },
+    "清除网站数据" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Clear Website Data" } },
+        "zh-Hant" : { "stringUnit" : { "state" : "translated", "value" : "清除網站資料" } }
+      }
+    },
+    "正在清除…" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Clearing…" } },
+        "zh-Hant" : { "stringUnit" : { "state" : "translated", "value" : "正在清除…" } }
+      }
+    },
+    "清除网站数据并退出登录？" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Clear website data and sign out?" } },
+        "zh-Hant" : { "stringUnit" : { "state" : "translated", "value" : "清除網站資料並登出？" } }
+      }
+    },
+    "清除" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Clear" } },
+        "zh-Hant" : { "stringUnit" : { "state" : "translated", "value" : "清除" } }
+      }
+    },
+    "网站数据已清除" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Website data cleared" } },
+        "zh-Hant" : { "stringUnit" : { "state" : "translated", "value" : "網站資料已清除" } }
+      }
+    },
+    "清除后需重新登录网站。" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "You will need to sign in to websites again." } },
+        "zh-Hant" : { "stringUnit" : { "state" : "translated", "value" : "清除後需重新登入網站。" } }
+      }
+    },
+    "关于" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "About" } },
+        "zh-Hant" : { "stringUnit" : { "state" : "translated", "value" : "關於" } }
+      }
+    },
+    "版本" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Version" } },
+        "zh-Hant" : { "stringUnit" : { "state" : "translated", "value" : "版本" } }
+      }
+    },
+    "浏览" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Browsing" } },
+        "zh-Hant" : { "stringUnit" : { "state" : "translated", "value" : "瀏覽" } }
+      }
+    },
+    "同一 Wi-Fi 下的 Chromecast" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Chromecast on This Wi-Fi" } },
+        "zh-Hant" : { "stringUnit" : { "state" : "translated", "value" : "同一 Wi-Fi 下的 Chromecast" } }
+      }
+    },
+    "正在查找设备…" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Searching for devices…" } },
+        "zh-Hant" : { "stringUnit" : { "state" : "translated", "value" : "正在查找裝置…" } }
+      }
+    },
+    "重新查找" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Search Again" } },
+        "zh-Hant" : { "stringUnit" : { "state" : "translated", "value" : "重新查找" } }
+      }
+    },
+    "仅断开手机连接" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Disconnect Phone Only" } },
+        "zh-Hant" : { "stringUnit" : { "state" : "translated", "value" : "僅斷開手機連接" } }
+      }
+    },
+    "当前视频" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Current Video" } },
+        "zh-Hant" : { "stringUnit" : { "state" : "translated", "value" : "目前影片" } }
+      }
+    },
+    "可能是正片" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Likely Main Video" } },
+        "zh-Hant" : { "stringUnit" : { "state" : "translated", "value" : "可能是正片" } }
+      }
+    },
+    "主播放列表" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Master Playlist" } },
+        "zh-Hant" : { "stringUnit" : { "state" : "translated", "value" : "主播放清單" } }
+      }
+    },
+    "不支持投屏" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Can't Cast" } },
+        "zh-Hant" : { "stringUnit" : { "state" : "translated", "value" : "不支援投放" } }
+      }
+    },
+    "如果投屏失败，回到网页重新播放视频后再试。" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "If casting fails, replay the video in the page and try again." } },
+        "zh-Hant" : { "stringUnit" : { "state" : "translated", "value" : "如果投放失敗，回到網頁重新播放影片後再試。" } }
+      }
+    },
+    "在浏览器播放视频，再点「视频」投到电视。" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Play a video in the browser, then tap \"Videos\" to cast it to the TV." } },
+        "zh-Hant" : { "stringUnit" : { "state" : "translated", "value" : "在瀏覽器播放影片，再點「影片」投到電視。" } }
+      }
+    },
+    "正在请求电视加载视频…" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Asking the TV to load the video…" } },
+        "zh-Hant" : { "stringUnit" : { "state" : "translated", "value" : "正在請求電視載入影片…" } }
+      }
+    }
+  },
+  "version" : "1.0"
+}
