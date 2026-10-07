@@ -3,7 +3,7 @@
 ## Goal
 Implement the iPhone browser → video detection → Chromecast → remote MVP from PLAN.md, with observable validation and honest device acceptance status.
 
-Current follow-up: write the YC-style English and Traditional Chinese READMEs, then commit and push the reviewed app/icon/documentation state to the user-specified repository, preserving existing history.
+README/publication follow-up complete: the YC-style English and Traditional Chinese READMEs, app icon and validation records were committed and pushed to the user-specified repository, preserving existing history. Remaining receiver acceptance is listed below and is separate from this completed publication task.
 
 ## Acceptance criteria and append-only requirements
 1. Follow PLAN.md: iOS 16+, SwiftUI, Chinese, Google Cast 4.8.6, Default Media Receiver, XcodeGen.
@@ -36,6 +36,7 @@ Current follow-up: write the YC-style English and Traditional Chinese READMEs, t
 - Validation uses an explicit offline launch environment that does not initialize the Cast SDK, preventing automatic reconnection as well as deliberate connection.
 
 ## Evidence
+- Publication follow-up (requirements 17 and 20): commit db0937150aa1d38fe29dda32f5907ffba3f67a87 (user-requested message: first commit) was pushed to origin/main at https://github.com/ycl-2004/Webcast.git. Remote main matched local HEAD; the worktree was clean and main tracked origin/main. GitHub contents API returned both READMEs with blob SHAs matching local Git. Existing commits ff47504 and 98c1874 were preserved. Local signing/device settings, credentials and binary build products remain ignored. This record is committed separately after verification.
 - README follow-up (requirement 20): completed English README.md and Traditional Chinese README.zh-TW.md from current source/configuration and existing validation evidence. Checked 32 local links/images/anchors; verified version, dependency, platform and all eight documented Make targets; validated GitHub HTML formatting and navigation targets; five badge URLs returned HTTP 200. Apple Personal Team expiration was checked against Apple's current account overview. JS syntax, Info.plist, icon JSON, diff whitespace and credential-pattern checks passed. No app behavior changed, so the recorded 20/20 tests and this session's signed Release build/install evidence were reused.
 - 2026-10-07: Xcode 27.0 and XcodeGen available. XcodeBuildMCP lists iOS 18.6 and 26.5 simulators.
 - Browser page https://www.iyf.tv/play/qXvszbfSdq5: title 仙逆-01; video currentSrc is blob. Observed playlist host sss8-e1.pipecdn.vip; signed query is intentionally not committed.
@@ -62,4 +63,4 @@ Current follow-up: write the YC-style English and Traditional Chinese READMEs, t
 - Software implementation and simulator validation complete. make generate, JS syntax, plist lint, local documentation links and file whitespace checks passed; final regenerated project simulator build passed.
 - Follow-up requirements 7–14 complete: regression review/fixes, 爱壹帆 copy, pi investigation, scoped cleanup, signed Release install, focused UI text, and preserved no-TV-command boundary.
 - User has confirmed one actual television playback. Specific 爱壹帆 source, individual remote actions and lock-screen/Wi-Fi acceptance remain open; no-TV-command boundary remains for agent work. Personal Team weekly re-signing remains a maintenance constraint.
-- Publication destination resolved by the user's explicit request: https://github.com/ycl-2004/Webcast.git, main. Read-only checks confirmed a public empty repository with Issues enabled and no published releases. Existing local main history is preserved; no duplicate title, repository reinitialization, or history replacement is needed. Final delivery must verify the pushed main commit against local HEAD.
+- README/publication requirements 17 and 20 are complete. The target is https://github.com/ycl-2004/Webcast.git, main, with the existing local history preserved. Both README files were verified on GitHub; publication introduced no release tag or binary distribution.
