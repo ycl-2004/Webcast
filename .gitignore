@@ -1,0 +1,12 @@
+.DS_Store
+.build/
+DerivedData/
+Build/
+xcuserdata/
+*.xcuserstate
+.swiftpm/
+.xcodebuildmcp/
+.pi/
+Webcast.xcodeproj/
+artifacts/private/
+artifacts/*.log

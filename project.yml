@@ -1,0 +1,85 @@
+name: Webcast
+options:
+  bundleIdPrefix: dev.yc
+  deploymentTarget:
+    iOS: "16.0"
+  xcodeVersion: "27.0"
+packages:
+  GoogleCast:
+    url: https://github.com/SRGSSR/google-cast-sdk
+    exactVersion: 4.8.6
+settings:
+  base:
+    SWIFT_VERSION: "5.0"
+    TARGETED_DEVICE_FAMILY: "1,2"
+    CODE_SIGN_STYLE: Automatic
+    ENABLE_USER_SCRIPT_SANDBOXING: YES
+targets:
+  Webcast:
+    type: application
+    platform: iOS
+    sources:
+      - path: Webcast
+        excludes:
+          - Sniffer/sniff.js
+          - Resources
+          - Info.plist
+      - path: Webcast/Sniffer/sniff.js
+        buildPhase: resources
+      - path: Webcast/Resources
+        buildPhase: resources
+    info:
+      path: Webcast/Info.plist
+      properties:
+        CFBundleDisplayName: Webcast
+        CFBundleShortVersionString: "0.1.0"
+        CFBundleVersion: "1"
+        LSRequiresIPhoneOS: true
+        UILaunchScreen: {}
+        UIApplicationSceneManifest:
+          UIApplicationSupportsMultipleScenes: false
+        NSLocalNetworkUsageDescription: 连接同一 Wi-Fi 下的 Chromecast，将你选择的视频投到电视。
+        NSBonjourServices:
+          - _googlecast._tcp
+          - _CC1AD845._googlecast._tcp
+        NSAppTransportSecurity:
+          NSAllowsArbitraryLoadsInWebContent: true
+        UISupportedInterfaceOrientations:
+          - UIInterfaceOrientationPortrait
+          - UIInterfaceOrientationLandscapeLeft
+          - UIInterfaceOrientationLandscapeRight
+        UISupportedInterfaceOrientations~ipad:
+          - UIInterfaceOrientationPortrait
+          - UIInterfaceOrientationPortraitUpsideDown
+          - UIInterfaceOrientationLandscapeLeft
+          - UIInterfaceOrientationLandscapeRight
+    dependencies:
+      - package: GoogleCast
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: dev.yc.Webcast
+        INFOPLIST_KEY_CFBundleDevelopmentRegion: zh_CN
+        OTHER_LDFLAGS: $(inherited) -ObjC
+  WebcastTests:
+    type: bundle.unit-test
+    platform: iOS
+    sources: [Tests/Swift]
+    dependencies:
+      - target: Webcast
+      - package: GoogleCast
+    settings:
+      base:
+        GENERATE_INFOPLIST_FILE: YES
+schemes:
+  Webcast:
+    build:
+      targets:
+        Webcast: all
+    run:
+      config: Debug
+    test:
+      config: Debug
+      environmentVariables:
+        WEBCAST_OFFLINE_VALIDATION: "1"
+      targets:
+        - WebcastTests
