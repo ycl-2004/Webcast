@@ -39,12 +39,15 @@ struct DevicePicker: View {
                             }
                         }
                     }
-                    Section { Text("查看列表只会扫描设备。点选设备后才会连接。").font(.footnote).foregroundStyle(.secondary) }
                 }
             }
             .navigationTitle("选择电视").navigationBarTitleDisplayMode(.inline)
             .toolbar { ToolbarItem(placement: .confirmationAction) { Button("完成") { dismiss() } } }
             .onAppear(perform: cast.discover)
+            // sheet 盖住根视图时，ContentView 根部的 alert 不会弹出，这里补一份同样的错误提示
+            .alert("投屏提示", isPresented: Binding(get: { cast.errorMessage != nil }, set: { if !$0 { cast.errorMessage = nil } })) {
+                Button("知道了", role: .cancel) { cast.errorMessage = nil }
+            } message: { Text(cast.errorMessage ?? "") }
         }
     }
 }

@@ -1,96 +1,66 @@
 # Webcast
 
-自用的 iPhone 网页视频投屏 App：打开网页、检测视频地址、手动连接 Chromecast，再用手机控制电视播放。App 本身不含广告；网站自身的广告仍会显示，过滤留在 Phase 2。
+iPhone 网页视频投屏 App：打开网页，播放视频，再投到 Chromecast；手机可控制播放、进度和音量。
 
-**当前状态：软件已构建并在 iPhone 模拟器运行，14 项测试通过，iyf《仙逆》第一集的原生 HLS 已成功检测并在手机页面播放。尚未安装到真实 iPhone，也未连接电视或验收电视播放。**
+**当前版本：0.1.1 (2)，签名 Release 已安装到 iPhone 15。20 项测试通过；用户已在电视上实测播放成功。遥控、锁屏和 Wi-Fi 恢复仍待逐项验收。** 详见 [验证记录](artifacts/validation.md) 和 [本轮检查](artifacts/review-2026-10-07.md)。
 
-Chrome 扫描已显示 `Dining room TV — Available`。这只证明 Mac 的 Chrome 能发现设备，不能代替 iPhone 发现和播放验收。详细记录见 [可行性与验收](docs/FEASIBILITY.md)。
+## 使用
 
-## 启动
+1. 手机与电视连接同一 Wi-Fi。
+2. 在「浏览器」打开爱壹帆或其他网站，选集并播放。
+3. 点底部「视频」，选择「当前视频」或时长、来源相符的条目，再点「投到电视」。未连接时会先选择电视。
+4. 在「投屏遥控」控制播放、进度、音量和停止；「断开连接」只断开手机，「停止并断开」同时停止电视播放。
 
-需要 Xcode、iOS 平台 SDK 和 XcodeGen。最低 iOS 16；Google Cast 通过 `SRGSSR/google-cast-sdk` 精确固定在 4.8.6。首次构建需要联网下载 SDK。
+投屏失败时，回到网页重新播放，再获取视频地址。部分网站需要 Cookie、请求头或 DRM 授权，电视无法直接使用这些条件；手机网页能播放不代表电视一定能播。MSE 的「可能是正片」是推断结果，请核对时长和来源。[接收端待验收事项](docs/FEASIBILITY.md)。
+
+「设置」可调整主页、搜索引擎、桌面网站和启动位置；清除网站数据后需重新登录。
+
+## 构建与安装
+
+需要 Xcode、iOS SDK 和 XcodeGen。最低 iOS 16；Google Cast 固定为 `SRGSSR/google-cast-sdk` 4.8.6。首次构建需联网下载依赖。
 
 ```sh
 make generate
 open Webcast.xcodeproj
+make build    # 模拟器 Release
+make release  # 真机 Release 编译，不签名、不安装
 ```
 
-在 Xcode 选择 `Webcast` scheme 和一个 iPhone 模拟器，运行即可。新机器的模拟器名称可能不同，可用 `xcrun simctl list devices available` 查看。
+工程默认 Run、Profile、Archive 均使用 Release；测试明确使用 Debug。
 
-### 只验证软件，不连接电视
+### 自己的 iPhone
 
-在 Xcode 的 Edit Scheme → Run → Arguments → Environment Variables 中添加：
+在 Xcode Settings → Apple Accounts 登录账号，选择 Personal Team，并保持自动签名。手机需信任此 Mac、启用开发者模式。
 
-```text
-WEBCAST_OFFLINE_VALIDATION = 1
-WEBCAST_DEMO = 1
-```
+本机配置已保存在 Git 忽略的 `Config/Signing.local.xcconfig` 和 `.device.mk`；重新生成工程不会丢失团队。其他机器可分别写入：
 
-第一个变量会完全跳过 Cast SDK 初始化，因此设备发现、自动恢复会话、连接和遥控全部关闭。第二个打开内置的 Apple HLS 检测示例。需要验证真实网站时去掉第二个变量即可；浏览器菜单也可切换示例或 iyf。
+在 `Config/Signing.local.xcconfig` 写入 `DEVELOPMENT_TEAM = <Xcode 中的 Team ID>`，在 `.device.mk` 写入 `DEVICE_UDID := <手机 UDID>`。
 
 ```sh
-make build
+make device-build    # 仅构建签名 Release
+make device-install  # 构建并安装，不启动
+make device          # 构建、安装并启动；请自行确认已准备使用电视
+```
+
+Personal Team 的安装配置有效期为 7 天，到期需重新构建安装。Release 是编译配置；本次使用 Apple Development 签名，并未发布 App Store。需要免每周重签的分发方式时，另行配置相应的开发者账号与分发签名。[Apple 说明](https://developer.apple.com/help/account/basics/about-your-developer-account#Enable-a-personal-team-in-Xcode)。
+
+### 本地验证
+
+```sh
 make test SIMULATOR='iPhone 16 Pro'
+make demo SIMULATOR_ID='<已启动模拟器 UUID>'
 ```
 
-已经启动模拟器时，可用以下命令安装并启动离线示例：
+测试使用 Debug 和 `WEBCAST_OFFLINE_VALIDATION=1`，跳过 Cast SDK 初始化，避免自动重连或控制电视。`make demo` 额外打开内置 HLS 示例。上述环境开关、WebKit 检查和 SDK 调试日志均不在 Release 中生效。
 
-```sh
-make demo SIMULATOR_ID='<模拟器 UUID>'
-```
+## 实现与限制
 
-Xcode 27 的本机模拟器界面位于 **Device Hub**；旧版 Xcode 使用 Simulator。当前 XcodeBuildMCP 的 `open_sim` / `snapshot_ui` 仍依赖旧入口，因此本次使用 Device Hub 检查实际界面。
+- WKWebView 覆盖主页面与子框架；原生媒体源、fetch/XHR、MIME 和 HLS 正文用于检测。
+- 保留签名 query，按去除 fragment 的地址去重；换页隔离旧候选，SPA 导航重置列表。
+- `blob:` 和非 HTTP(S) 地址不进入列表；已识别的 DRM 条目禁用投屏，未标记不代表一定没有 DRM。
+- Default Media Receiver 直接拉流；当前没有本地代理或后台音频保活。网站替换网络 hook、特殊播放器或缺少类型的无后缀地址可能无法检测。
+- 字幕、队列、广告过滤、历史和书签保留为后续范围。
 
-### 安装到自己的 iPhone
+项目入口：`project.yml`（工程）、`Webcast/Browser`（浏览器）、`Webcast/Sniffer`（检测）、`Webcast/Cast`（会话与遥控）、`Webcast/Views`（界面）、`Tests/Swift`（单元与真实 WebKit 集成测试）。
 
-1. 在 Xcode 的 Settings → Accounts 登录自己的 Apple Account。
-2. 打开 `Webcast` target → Signing & Capabilities，选择自己的 Personal Team，保持自动签名。Bundle Identifier 如果冲突，改成自己唯一的标识。
-3. 连接并信任 iPhone，按系统提示启用开发者模式，在 Xcode 选择手机并运行。
-4. 仅在准备测试投屏时，移除 `WEBCAST_OFFLINE_VALIDATION`。点击右上角电视图标会扫描；**点选设备才会建立新连接**。已有投屏会话在正常模式下由 SDK 自动恢复。
-
-Personal Team 的设备安装配置文件会在 7 天后过期，需要重新构建并安装。见 [Apple 的 Personal Team 说明](https://developer.apple.com/help/account/basics/about-your-developer-account#Enable-a-personal-team-in-Xcode)。本次没有选择签名团队、创建证书或向真实手机安装。
-
-## 使用
-
-1. 先连接同一 Wi-Fi 下的 Chromecast。在遥控页可手动投屏 Apple HLS 测试视频。
-2. 浏览器打开 iyf，选集并播放；点击底部「视频」。
-3. 优先选择主播放列表或带「当前视频」标记、时长与正片相符的条目，然后点「投到电视」。未连接时会先进入设备选择页。
-4. 遥控页支持播放/暂停、进度、前后 15 秒、音量、静音和停止。「仅断开手机连接」与「停止并断开」是不同操作。
-
-请求提交后界面显示加载状态；播放、暂停等状态以接收端的 SDK 回报为准。加载错误不会被显示成成功。视频地址可能带短期签名，过期后返回网页重新播放获取。
-
-## 检测与限制
-
-- `WKWebView` 在 document start 注入页面世界脚本，覆盖主页面和子框架。
-- 原生路径：`video.src`、`setAttribute`、`source.src`、DOM 变化及媒体事件。MSE 路径：fetch/XHR 的 URL、MIME、HLS 响应正文。
-- 保留所有签名 query；去掉 fragment 后去重，主列表优先。换页生成新的检测代次，旧页面上报被拒绝；SPA 路由会清空旧候选。
-- `blob:` 和非 HTTP(S) 地址不会进入列表。MSE 的「播放器候选」只根据同框架的近期播放列表请求推断，不能保证它一定是正片；广告或预加载需要用户核对时长和来源。
-- 已识别的 SAMPLE-AES / 非 identity KEYFORMAT / DASH ContentProtection 会标记 DRM 并禁止加载；这是初步检测，不能证明未标记的流没有 DRM。
-- Default Media Receiver 直接从服务器拉流，无法使用网页的自定义 Referer、Cookie 或授权头。**iyf 能在手机播放，不等于电视能播。** 本地代理是否进入 MVP 仍待第 0 步实测决定；当前未加入代理或后台音频保活。
-- 原生播放的无后缀 URL 若没有可观察的 `source.type`，公开 WKWebView API 无法取得它的子资源 Content-Type；网络 hook 被网站替换或使用特殊播放器时，也可能无法检测。
-
-## 项目结构
-
-```text
-project.yml                    XcodeGen 工程和精确版本依赖
-Webcast/Browser/                持久 WKWebView、导航和加载状态
-Webcast/Sniffer/                JS hook、消息桥和换页隔离
-Webcast/Models/                 地址校验、候选去重与排序
-Webcast/Cast/                   SDK 会话状态、媒体请求与遥控
-Webcast/Views/                  中文 SwiftUI 双 Tab、设备/视频浮层
-Tests/Swift/                   数据规则与真实 WKWebView 集成测试
-docs/FEASIBILITY.md             第 0 步发现、未完成项和真机验收表
-artifacts/                     本次运行截图和本机诊断记录
-```
-
-工程可以随时重新生成；签名团队和个人 Xcode 运行设置没有写死在 `project.yml` 中。生成后如果需要长期保留个人设置，请用 Xcode 的用户 scheme，或自行设置运行环境变量。
-
-## 实现依据
-
-- [Google Cast iOS 接入、主线程调用与自动恢复会话](https://developers.google.com/cast/docs/ios_sender/integrate)
-- [自定义设备选择器的发现启动和本地网络权限](https://developers.google.com/cast/docs/ios_sender/permissions_and_discovery)
-- [媒体信息 Builder 和 HLS 分片格式](https://developers.google.com/cast/docs/reference/ios/interface_g_c_k_media_information_builder)
-- [SDK 4.8.6 的 SPM 包定义](https://github.com/SRGSSR/google-cast-sdk/blob/4.8.6/Package.swift)
-- [Apple WKUserScript](https://developer.apple.com/documentation/webkit/wkuserscript)
-
-测试内容：签名 URL 保留、去重/排序、当前视频替换、MIME/正文识别、DRM 元数据、地址校验、离线模式、SDK 媒体构建和可选回调 selector；真实 WKWebView 的原生源、opaque-origin iframe、fetch 原始响应保留、blob 过滤、XHR 重用。
+实现依据：[Google Cast 接入](https://developers.google.com/cast/docs/ios_sender/integrate)、[设备发现与权限](https://developers.google.com/cast/docs/ios_sender/permissions_and_discovery)、[SDK 包版本](https://github.com/SRGSSR/google-cast-sdk/blob/4.8.6/Package.swift)、[WKUserScript](https://developer.apple.com/documentation/webkit/wkuserscript)。

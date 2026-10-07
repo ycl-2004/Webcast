@@ -1,5 +1,5 @@
 .DS_Store
-.build/
+.build*/
 DerivedData/
 Build/
 xcuserdata/
@@ -10,3 +10,6 @@ xcuserdata/
 Webcast.xcodeproj/
 artifacts/private/
 artifacts/*.log
+artifacts/Release/
+Config/*.local.xcconfig
+.device.mk

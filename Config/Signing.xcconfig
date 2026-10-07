@@ -1,0 +1,2 @@
+// 个人签名保存在本机，重新生成工程时继续使用。
+#include? "Signing.local.xcconfig"

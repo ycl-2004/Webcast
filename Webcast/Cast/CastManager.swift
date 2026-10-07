@@ -37,12 +37,17 @@ final class CastManager: NSObject, ObservableObject {
     private var timer: Timer?
     private var loadRequest: GCKRequest?
     private var requests: [ObjectIdentifier: (GCKRequest, String)] = [:]
+    private var reportedPlaybackError = false
     var canControl: Bool { !offlineValidation && connection == .connected }
 
     override init() {
+        #if DEBUG
         let environment = ProcessInfo.processInfo.environment
         offlineValidation = environment["WEBCAST_OFFLINE_VALIDATION"] == "1"
             || environment["XCTestConfigurationFilePath"] != nil
+        #else
+        offlineValidation = false
+        #endif
         if offlineValidation {
             context = nil
         } else {
@@ -57,11 +62,30 @@ final class CastManager: NSObject, ObservableObject {
         super.init()
         context?.sessionManager.add(self)
         context?.discoveryManager.add(self)
+        #if DEBUG
+        // Debug 构建下转发 Google Cast SDK 原生日志，便于真机排查发现/连接/加载链路
+        GCKLogger.sharedInstance().delegate = self
+        #else
+        GCKLogger.sharedInstance().loggingEnabled = false
+        #endif
         refreshSession()
         if !offlineValidation {
+            updateTimerState()
+        }
+    }
+
+    deinit { timer?.invalidate() }
+
+    /// 只在有活动会话时开启每秒轮询；断开后挂起，避免长期待机空转
+    private func updateTimerState() {
+        let active = canControl && context?.sessionManager.currentCastSession != nil
+        if active, timer == nil {
             timer = Timer.scheduledTimer(withTimeInterval: 1, repeats: true) { [weak self] _ in
                 Task { @MainActor [weak self] in self?.updatePlayback() }
             }
+        } else if !active, let existing = timer {
+            existing.invalidate()
+            timer = nil
         }
     }
 
@@ -141,6 +165,7 @@ final class CastManager: NSObject, ObservableObject {
             connection = .disconnected
             deviceName = ""
             clearPlayback()
+            updateTimerState()
             return
         }
         deviceName = session.device.friendlyName ?? "Chromecast"
@@ -151,6 +176,7 @@ final class CastManager: NSObject, ObservableObject {
             mediaClient = nextClient
             mediaClient?.add(self)
         }
+        updateTimerState()
         updatePlayback()
     }
 
@@ -158,12 +184,14 @@ final class CastManager: NSObject, ObservableObject {
         hasMedia = false; isPlaying = false; isLoading = false
         title = ""; position = 0; duration = 0; playbackLabel = "尚未播放视频"
         loadRequest = nil; requests.removeAll()
+        reportedPlaybackError = false
     }
 
     private func updatePlayback() {
         guard !offlineValidation else { return }
         if let session = context?.sessionManager.currentCastSession {
-            volume = Double(session.currentDeviceVolume)
+            let rawVolume = Double(session.currentDeviceVolume)
+            volume = rawVolume.isFinite ? min(max(rawVolume, 0), 1) : 0.5
             isMuted = session.currentDeviceMuted
         }
         guard let client = mediaClient, let status = client.mediaStatus else { return }
@@ -185,8 +213,11 @@ final class CastManager: NSObject, ObservableObject {
         default: playbackLabel = "尚未播放视频"
         }
         if state == .idle && status.idleReason == .error {
-            errorMessage = "电视无法播放这个地址。视频可能已过期，或需要网站请求头、CORS 支持或 DRM 授权。请在网页里重新播放后再试。"
-        }
+            if !reportedPlaybackError {
+                errorMessage = "电视无法播放这个视频。请回到网页重新播放，再试一次。"
+                reportedPlaybackError = true
+            }
+        } else { reportedPlaybackError = false }
     }
 
     private func refreshDevices() {
@@ -209,7 +240,10 @@ extension CastManager: @preconcurrency GCKSessionManagerListener {
     func sessionManager(_ sessionManager: GCKSessionManager, didStart session: GCKCastSession) { refreshSession() }
     @objc(sessionManager:didResumeCastSession:)
     func sessionManager(_ sessionManager: GCKSessionManager, didResumeCastSession session: GCKCastSession) { refreshSession() }
-    func sessionManager(_ sessionManager: GCKSessionManager, didSuspend session: GCKCastSession, with reason: GCKConnectionSuspendReason) { connection = .suspended }
+    func sessionManager(_ sessionManager: GCKSessionManager, didSuspend session: GCKCastSession, with reason: GCKConnectionSuspendReason) {
+        connection = .suspended
+        updateTimerState()
+    }
     func sessionManager(_ sessionManager: GCKSessionManager, didEnd session: GCKCastSession, withError error: Error?) {
         refreshSession()
         if error != nil { errorMessage = "连接已中断。请检查手机与电视的 Wi-Fi。" }
@@ -231,6 +265,14 @@ extension CastManager: @preconcurrency GCKRemoteMediaClientListener {
     func remoteMediaClient(_ client: GCKRemoteMediaClient, didUpdate mediaStatus: GCKMediaStatus?) { updatePlayback() }
 }
 
+#if DEBUG
+extension CastManager: GCKLoggerDelegate {
+    nonisolated func logMessage(_ message: String, at level: GCKLoggerLevel, fromFunction function: String, location: String) {
+        print("[GCK] \(function): \(message)")
+    }
+}
+#endif
+
 extension CastManager: @preconcurrency GCKRequestDelegate {
     func requestDidComplete(_ request: GCKRequest) {
         requests.removeValue(forKey: ObjectIdentifier(request))
@@ -240,7 +282,7 @@ extension CastManager: @preconcurrency GCKRequestDelegate {
     func request(_ request: GCKRequest, didFailWithError error: GCKError) {
         let action = requests.removeValue(forKey: ObjectIdentifier(request))?.1 ?? "操作"
         if request === loadRequest { isLoading = false; loadRequest = nil }
-        errorMessage = "\(action)失败（\(error.code)）。请检查电视连接；如果加载失败，请重新获取视频地址。"
+        errorMessage = "\(action)失败。请检查电视连接；如果加载失败，请回到网页重新播放。"
     }
     func request(_ request: GCKRequest, didAbortWith reason: GCKRequestAbortReason) {
         requests.removeValue(forKey: ObjectIdentifier(request))

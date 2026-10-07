@@ -86,5 +86,8 @@ final class CandidateStoreTests: XCTestCase {
                          "didInsertDevice:atIndex:", "remoteMediaClient:didUpdateMediaStatus:", "request:didFailWithError:"] {
             XCTAssertTrue(manager.responds(to: NSSelectorFromString(selector)), selector)
         }
+        #if DEBUG
+        XCTAssertTrue(manager.responds(to: NSSelectorFromString("logMessage:atLevel:fromFunction:location:")))
+        #endif
     }
 }

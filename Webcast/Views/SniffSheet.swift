@@ -13,7 +13,7 @@ struct SniffSheet: View {
                     VStack(spacing: 16) {
                         Image(systemName: "play.rectangle").font(.system(size: 44)).foregroundStyle(.teal)
                         Text("还没有检测到视频").font(.title3.weight(.semibold))
-                        Text("先在网页里打开一集并开始播放，视频地址会自动出现在这里。")
+                        Text("先在网页里播放视频。")
                             .foregroundStyle(.secondary).multilineTextAlignment(.center)
                         Button("返回网页播放") { dismiss() }.buttonStyle(.borderedProminent)
                     }.padding(32)
@@ -25,12 +25,11 @@ struct SniffSheet: View {
                                     Text(candidate.displayTitle).font(.headline).lineLimit(2)
                                     HStack(spacing: 6) {
                                         badge(candidate.format.label)
-                                        if candidate.isMaster { badge("主播放列表") }
-                                        if candidate.isCurrent { badge(candidate.source == "mse" ? "播放器候选" : "当前视频") }
-                                        if candidate.isDRM { badge("需要 DRM 授权") }
+                                        if candidate.isDRM { badge("不支持投屏") }
+                                        else if candidate.isCurrent { badge(candidate.source == "mse" ? "可能是正片" : "当前视频") }
+                                        else if candidate.isMaster { badge("主播放列表") }
                                     }
                                     Text(candidate.host).font(.subheadline).foregroundStyle(.secondary)
-                                    Text(candidate.url.lastPathComponent).font(.caption).foregroundStyle(.secondary).lineLimit(1)
                                     HStack {
                                         if let duration = candidate.duration { Text(timeLabel(duration)).font(.caption).foregroundStyle(.secondary) }
                                         Spacer()
@@ -40,13 +39,17 @@ struct SniffSheet: View {
                                 }.padding(.vertical, 8)
                             }
                         } footer: {
-                            Text("主播放列表优先。MSE 的「播放器候选」根据近期请求推断，请核对视频时长和来源；地址可能过期，失败时返回网页重新播放。")
+                            Text("如果投屏失败，回到网页重新播放视频后再试。")
                         }
                     }
                 }
             }
             .navigationTitle("检测到的视频").navigationBarTitleDisplayMode(.inline)
             .toolbar { ToolbarItem(placement: .confirmationAction) { Button("完成") { dismiss() } } }
+            // sheet 盖住根视图时，ContentView 根部的 alert 不会弹出，这里补一份同样的错误提示
+            .alert("投屏提示", isPresented: Binding(get: { cast.errorMessage != nil }, set: { if !$0 { cast.errorMessage = nil } })) {
+                Button("知道了", role: .cancel) { cast.errorMessage = nil }
+            } message: { Text(cast.errorMessage ?? "") }
         }.presentationDetents([.medium, .large])
     }
     private func badge(_ label: String) -> some View {
