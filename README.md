@@ -9,7 +9,7 @@
 </p>
 
 <p align="center">
-  <img src="https://img.shields.io/badge/status-source%20build-111111" alt="Source build; no public binary release">
+  <a href="https://github.com/ycl-2004/Webcast/releases/tag/v0.1.2"><img src="https://img.shields.io/badge/release-v0.1.2%20prerelease-111111" alt="v0.1.2 prerelease"></a>
   <img src="https://github.com/ycl-2004/Webcast/actions/workflows/ci.yml/badge.svg" alt="CI unit tests">
   <img src="https://img.shields.io/badge/iOS-16.0%2B-111111?logo=apple&amp;logoColor=white" alt="iOS 16.0 or later">
   <img src="https://img.shields.io/badge/version-0.1.2%20%284%29-111111" alt="Current source build 0.1.2 (4)">
@@ -18,6 +18,7 @@
 </p>
 
 <p align="center">
+  <a href="https://github.com/ycl-2004/Webcast/releases/tag/v0.1.2"><strong>Download prerelease</strong></a> ·
   <a href="#quick-start">Quick start</a> ·
   <a href="#features">Features</a> ·
   <a href="#privacy">Privacy</a> ·
@@ -28,11 +29,11 @@
 
 Webcast is a native iOS browser and Chromecast remote for watching web videos on a larger screen. Open a website, play a video, and choose a detected stream to send to the TV. The TV fetches the stream directly; the phone handles browsing and playback controls.
 
-> **Current distribution:** source build only; there is no App Store, TestFlight, or downloadable binary release. A locally signed Release **0.1.2 (4)** was installed and launch-verified on an iPhone 15. Core Chromecast playback and controls passed on that phone; browser UI, lock-screen behavior, and Wi-Fi recovery remain unaccepted. [Acceptance checklist](docs/ACCEPTANCE.md).
+> **Current distribution:** [v0.1.2 (4) prerelease](https://github.com/ycl-2004/Webcast/releases/tag/v0.1.2) provides an **unsigned iPhone IPA** that requires your own signing, plus an **ad-hoc signed simulator app** for Xcode on a Mac. There is no App Store or TestFlight release. A separately signed development Release passed core iPhone 15 → Chromecast tests; full browser UI, lock-screen behavior and Wi-Fi recovery remain pending. [Release notes](docs/releases/0.1.2.md) · [Acceptance checklist](docs/ACCEPTANCE.md).
 
 ## Quick start
 
-First [build and install Webcast](#build-from-source) using your own Apple signing account. For an installed copy:
+For an iPhone, [build and install Webcast](#build-from-source) using your own Apple signing account. The downloadable IPA requires signing before installation. To try the app on a Mac, use the [simulator package and installation commands](docs/releases/0.1.2.md#downloads-and-installation). For an installed phone copy:
 
 1. Connect your iPhone and Chromecast or Google Cast-enabled TV to the same Wi-Fi. Allow Webcast's **Local Network** permission.
 2. Open the **`浏览器`** tab, enter a website, and start playing a video. The default home page is 爱壹帆; you can change it in **`设置`**.
@@ -110,27 +111,23 @@ These checked-in captures came from an earlier simulator build on 2026-10-07. Th
 - The app bundles its own privacy manifest for local UserDefaults preferences; Google Cast keeps its own SDK manifest.
 - Websites, search providers, media hosts, and Google Cast components have their own network and data behavior. Webcast is not an offline app and does not make their traffic private.
 
-## Current build
+## Current release
 
-**0.1.2 (4)** is the current source version in [`project.yml`](project.yml). It isolates the native detection bridge, validates and budgets media messages, and bounds foreground connection waiting. The current `CastManager` passed public-HLS playback and controls against a physical Chromecast with an iOS simulator sender. The signed Release is installed and launch-verified on iPhone 15; the physical iPhone 15 (iOS 26.5) → Chromecast core playback/control test passed. Signing expires on 2026-11-02. [Installation receipt](artifacts/iphone-2026-10-26.json). See the [hardening and verification record](artifacts/hardening-2026-10-26.md) and [acceptance checklist](docs/ACCEPTANCE.md).
+**[v0.1.2 — build 4](https://github.com/ycl-2004/Webcast/releases/tag/v0.1.2)** is the first GitHub prerelease, packaged on 2026-10-28. Version metadata comes from [`project.yml`](project.yml). See the [release notes](docs/releases/0.1.2.md) for changes, installation, checksums and package reproduction.
 
-| Evidence | Result |
+| Artifact | Use |
 | --- | --- |
-| Historical signed iPhone Release build | 0.1.1 (2), installed on iPhone 15 on 2026-10-07 |
-| Current offline regression and Release evidence | See the [build 4 record](artifacts/hardening-2026-10-26.md) for exact runtime counts and bundle results |
-| Current CastManager → physical Chromecast | HLS playback confirmation, advancing position, pause, seek, resume, mute/unmute, stop, volume restoration and disconnect passed; passed with both an iOS 26.5 simulator and physical iPhone 15 |
-| Physical iPhone | Core SDK playback/control passed; [phone evidence](artifacts/iphone-receiver-2026-10-26.json). Signed Release restored and launched afterward |
-| Lock-screen / Wi-Fi recovery / soak / full UI | Pending; protocol status is not visual/audio or full UI acceptance |
-| Previous source tests (build 3) | 78 passed on each of iOS 18.6 and 26.5; [previous fix record](artifacts/fixes-2026-10-24.md) |
-| Public distribution | No published binary, App Store, or TestFlight release |
+| [Webcast-0.1.2-iOS-unsigned.ipa](https://github.com/ycl-2004/Webcast/releases/download/v0.1.2/Webcast-0.1.2-iOS-unsigned.ipa) | arm64, iOS 16+; unsigned, requires your own signing |
+| [Webcast-0.1.2-Simulator.zip](https://github.com/ycl-2004/Webcast/releases/download/v0.1.2/Webcast-0.1.2-Simulator.zip) | Xcode iOS Simulator app; arm64 + x86_64, ad-hoc signed |
+| [Webcast-0.1.2-ThirdPartyNotices.zip](https://github.com/ycl-2004/Webcast/releases/download/v0.1.2/Webcast-0.1.2-ThirdPartyNotices.zip) | Notices from the pinned Google Cast SDK archive |
+| [release-manifest.json](https://github.com/ycl-2004/Webcast/releases/download/v0.1.2/release-manifest.json) | Version, toolchain, architectures, source hashes and bundle checks |
+| [SHA256SUMS](https://github.com/ycl-2004/Webcast/releases/download/v0.1.2/SHA256SUMS) | SHA-256 verification for all four assets above |
 
-Source fixes from 2026-10-18 are tracked separately in the [F1–F6 fix record](artifacts/fixes-2026-10-18.md). Those historical builds were not installed on the phone or individually accepted on a receiver; the build 4 core receiver result is recorded above.
+Fresh simulator and arm64 iPhone Release builds passed bundle validation. The app extracted from the simulator ZIP installed and launched on iOS 18.6 / Apple Silicon. [GitHub CI](https://github.com/ycl-2004/Webcast/actions/runs/40733499670) passed tests and Release checks for the unchanged app source.
 
-Further foundation improvements are recorded in the [local quality review](artifacts/foundation-2026-10-18.md): the browser loads a page only when visited, and local media pauses only after matching receiver playback is confirmed. Local tests and component renders do not replace receiver acceptance.
+Prior hardware evidence: a separately signed **0.1.2 (4)** passed core HLS playback, pause, seek, resume, mute, stop and disconnect on a physical iPhone 15 / iOS 26.5 → Chromecast. [Phone test](artifacts/iphone-receiver-2026-10-26.json) · [Installation receipt](artifacts/iphone-2026-10-26.json). That personal development profile expires on 2026-11-02 and is excluded from the public packages.
 
-Sustained-browsing limits, navigation regressions, Cast quality metadata checks, and public UI cleanup are tracked in the [stability review](artifacts/stability-2026-10-18.md).
-
-See the [validation record](artifacts/validation.md), [implementation review](artifacts/review-2026-10-07.md), and [receiver acceptance checklist](docs/FEASIBILITY.md). The icon update did not change app behavior; tests were not rerun for that asset-only update.
+Full browser-to-TV UI, picture/sound confirmation, lock-screen/Wi-Fi recovery, long playback, minimum-iOS and physical-iPad acceptance remain pending. See the [acceptance checklist](docs/ACCEPTANCE.md) and [hardening record](artifacts/hardening-2026-10-26.md). Earlier engineering evidence is linked from [validation](artifacts/validation.md).
 
 ## FAQ
 
@@ -162,7 +159,7 @@ Manual receiver QA is separate from normal offline tests. Run `python3 scripts/r
 <details>
 <summary>Requirements, local signing, build, and validation commands</summary>
 
-Use a Mac with Xcode and the iOS SDK, plus XcodeGen on your `PATH`. Local validation uses Xcode **27.1**. CI explicitly selects Xcode **26.3** and an iOS **18.6** simulator; CI execution must still be checked after pushing. Google Cast uses the official **4.8.6** dynamic archive, pinned by URL and checksum in [`Packages/GoogleCast/Package.swift`](Packages/GoogleCast/Package.swift). This binary-only SPM manifest avoids duplicate classes observed with the upstream wrapper ([decision](docs/decisions/002-media-origin-and-official-sdk.md)); the first build needs network access for dependencies.
+Use a Mac with Xcode and the iOS SDK, plus XcodeGen on your `PATH`. Local validation uses Xcode **27.1**. CI explicitly selects Xcode **26.3** and an iOS **18.6** simulator; the [build-source CI run](https://github.com/ycl-2004/Webcast/actions/runs/40733499670) passed. Google Cast uses the official **4.8.6** dynamic archive, pinned by URL and checksum in [`Packages/GoogleCast/Package.swift`](Packages/GoogleCast/Package.swift). This binary-only SPM manifest avoids duplicate classes observed with the upstream wrapper ([decision](docs/decisions/002-media-origin-and-official-sdk.md)); the first build needs network access for dependencies.
 
 ```sh
 git clone https://github.com/ycl-2004/Webcast.git
@@ -191,6 +188,7 @@ Both files are ignored by Git. Replace the placeholders with your own values. Re
 make build           # Unsigned simulator Release
 make check-release   # Build Release and verify packaged resources/privacy/debug isolation (Python 3)
 make release         # Unsigned physical-device Release; does not install
+python3 scripts/package_release.py --output artifacts/Release/v0.1.2  # Package both Release builds; requires fresh output filenames
 make device-build    # Signed physical-device Release; does not install
 make device-install  # Build and install; does not launch the app
 make device          # Build, install, and launch the app
@@ -230,13 +228,16 @@ The existing records verify simulator builds/tests and signed device build/insta
 | `Webcast/Cast/` | Device discovery, sessions, media loading, and remote controls |
 | `Webcast/Assets.xcassets/`, `artwork/` | App icon, preserved original, and generation brief |
 | `Tests/Swift/` | Unit and real WebKit integration tests |
+| `scripts/` | Release bundle verification, packaging and opt-in receiver QA |
 | `docs/`, `artifacts/` | Feasibility, acceptance, screenshots, and validation evidence |
 
 ## Versioning and releases
 
 Update `CFBundleShortVersionString` and `CFBundleVersion` in `project.yml`, then run `make generate` to refresh `Webcast/Info.plist` and the generated project. Keep documentation aligned with the actual build.
 
-There are currently no release tags or published install artifacts. Local signing files, device identifiers, generated projects, and app bundles stay outside Git. Public iOS distribution requires a separate signing and release setup.
+Tags use `v<version>`; the first is `v0.1.2`. GitHub releases attach the versioned unsigned IPA, simulator ZIP, SDK notices, `release-manifest.json` and `SHA256SUMS`. The manifest identifies the build-source commit and product-file hashes; release documentation can be committed afterward without changing the app. See [package reproduction](docs/releases/0.1.2.md#reproduce-the-packages).
+
+Local signing files, device identifiers, generated projects and app bundles stay outside Git. Public packages contain no personal provisioning profile. App Store/TestFlight distribution requires a separate signing and release setup.
 
 ## Contributing
 
@@ -249,7 +250,7 @@ There are currently no release tags or published install artifacts. Local signin
 - DRM detection is best-effort. An unmarked candidate is not proof that a stream is DRM-free.
 - Subtitles, queues, ad filtering, browsing history, and bookmarks are not implemented.
 - Individual remote actions, specified 爱壹帆 episodes, lock-screen recovery, Wi-Fi recovery, and physical iPad use are not fully verified.
-- Personal Team installations need periodic re-signing; no automatic updater or public binary release is provided.
+- Personal Team installations need periodic re-signing; there is no automatic updater, App Store or TestFlight release. The public IPA requires your own signing.
 
 ## License
 

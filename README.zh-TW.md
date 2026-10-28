@@ -9,7 +9,8 @@
 </p>
 
 <p align="center">
-  <img src="https://img.shields.io/badge/status-source%20build-111111" alt="目前提供原始碼建置，沒有公開安裝包">
+  <a href="https://github.com/ycl-2004/Webcast/releases/tag/v0.1.2"><img src="https://img.shields.io/badge/release-v0.1.2%20prerelease-111111" alt="v0.1.2 預覽版"></a>
+  <img src="https://github.com/ycl-2004/Webcast/actions/workflows/ci.yml/badge.svg" alt="CI 單元測試">
   <img src="https://img.shields.io/badge/iOS-16.0%2B-111111?logo=apple&amp;logoColor=white" alt="iOS 16.0 或以上版本">
   <img src="https://img.shields.io/badge/version-0.1.2%20%284%29-111111" alt="目前原始碼版本 0.1.2，建置編號 4">
   <img src="https://img.shields.io/badge/SwiftUI-WKWebView-F05138?logo=swift&amp;logoColor=white" alt="使用 SwiftUI 與 WKWebView">
@@ -17,6 +18,7 @@
 </p>
 
 <p align="center">
+  <a href="https://github.com/ycl-2004/Webcast/releases/tag/v0.1.2"><strong>下載預覽版</strong></a> ·
   <a href="#快速開始">快速開始</a> ·
   <a href="#功能">功能</a> ·
   <a href="#隱私">隱私</a> ·
@@ -27,11 +29,11 @@
 
 Webcast 是原生 iOS 瀏覽器與 Chromecast 遙控器，適合想把網頁影片放到大螢幕觀看的人。開啟網站並播放影片，再選擇偵測到的串流投到電視。電視直接取得影片串流，手機負責瀏覽與播放控制。
 
-> **目前分發狀態：** 僅提供原始碼建置，尚無 App Store、TestFlight 或公開安裝包。本機簽名的 Release **0.1.2 (4)** 已安裝至 iPhone 15 並確認可啟動；該手機與 Chromecast 的核心播放及遙控已通過驗收，瀏覽器介面、鎖定畫面與 Wi-Fi 恢復仍待驗收。[驗收清單](docs/ACCEPTANCE.md)。
+> **目前分發狀態：** [v0.1.2（建置 4）預覽版](https://github.com/ycl-2004/Webcast/releases/tag/v0.1.2) 提供**未簽名的 iPhone IPA**，安裝前需要自行簽名，另提供供 Mac 上 Xcode 使用的 **ad-hoc 簽名模擬器 App**。尚無 App Store 或 TestFlight 版本。另行簽名的開發版已通過 iPhone 15 → Chromecast 核心測試；完整瀏覽器介面、鎖定畫面與 Wi-Fi 恢復仍待驗收。[發布說明（英文）](docs/releases/0.1.2.md) · [驗收清單（英文）](docs/ACCEPTANCE.md)。
 
 ## 快速開始
 
-請先使用自己的 Apple 簽名帳號[建置並安裝 Webcast](#從原始碼建置)。已安裝後：
+在 iPhone 使用時，請用自己的 Apple 簽名帳號[建置並安裝 Webcast](#從原始碼建置)。下載的 IPA 必須先簽名才能安裝。若要在 Mac 試用，可使用[模擬器套件與安裝指令（英文）](docs/releases/0.1.2.md#downloads-and-installation)。手機安裝完成後：
 
 1. 將 iPhone 與 Chromecast 或支援 Google Cast 的電視連到同一個 Wi-Fi，並允許 Webcast 的**本機網路**權限。
 2. 開啟 **`浏览器`** 分頁，輸入網站並播放影片。預設首頁為爱壹帆，可在 **`设置`** 更改。
@@ -70,6 +72,7 @@ Webcast 是原生 iOS 瀏覽器與 Chromecast 遙控器，適合想把網頁影�
 - 保留簽名網址參數、移除重複候選項目，並停用已辨識為 DRM 保護的項目。
 - 分開標示推測的 MSE 候選項目；**`可能是正片`** 是估計結果，請核對來源與時長。
 - 優先排列目前影片，再優先主播放清單；未知時長與直播分開處理。
+- 原生偵測橋在隔離的 WebKit 環境執行，並限制網頁觀察訊息的欄位、大小與頻率；投屏仍須由使用者明確選擇。
 
 **Chromecast 遙控**
 
@@ -108,27 +111,23 @@ Webcast 將選定網址與媒體資訊傳給 Google 的 Default Media Receiver�
 - App 自身包含本機 UserDefaults 偏好的隱私清單，Google Cast 保留獨立的 SDK 清單。
 - 網站、搜尋引擎、影片主機與 Google Cast 元件各有自己的網路與資料行為。Webcast 需要網路，也不會讓第三方流量變成私密流量。
 
-## 目前建置
+## 目前發布版本
 
-**0.1.2 (4)** 是 [`project.yml`](project.yml) 中的目前原始碼版本，加入隔離的原生偵測橋、訊息欄位與頻率限制、前台連線等待逾時。以 iOS 模擬器作傳送端，目前 `CastManager` 已通過真實 Chromecast 的公開 HLS 播放與遙控驗收。簽名 Release 已安裝並確認可在 iPhone 15 啟動；實體 iPhone 15（iOS 26.5）→ Chromecast 核心播放與遙控驗收已通過。簽名有效至 2026-11-02。[安裝紀錄](artifacts/iphone-2026-10-26.json)。請參閱[本輪修正與驗證紀錄](artifacts/hardening-2026-10-26.md)與[本版驗收清單](docs/ACCEPTANCE.md)。
+**[v0.1.2 — 建置 4](https://github.com/ycl-2004/Webcast/releases/tag/v0.1.2)** 是首個 GitHub 預覽版，於 2026-10-28 打包。版本資料以 [`project.yml`](project.yml) 為準。變更、安裝、校驗與重現打包指令見[發布說明（英文）](docs/releases/0.1.2.md)。
 
-| 證據 | 結果 |
+| 檔案 | 用途 |
 | --- | --- |
-| 歷史簽名 iPhone Release 建置 | 0.1.1 (2)，於 2026-10-07 安裝到 iPhone 15 |
-| 目前離線回歸與 Release 證據 | 各系統測試數量與包檢查結果見[建置 4 紀錄](artifacts/hardening-2026-10-26.md) |
-| 目前 CastManager → 真實 Chromecast | HLS 載入確認、時間推進、暫停、跳轉、恢復、靜音切換、停止、還原音量與斷開通過；iOS 26.5 模擬器與實體 iPhone 15 均通過 |
-| 實體 iPhone | 核心 SDK 播放／遙控通過；[真機證據](artifacts/iphone-receiver-2026-10-26.json)。測試後已還原並啟動 Release |
-| 鎖屏、Wi-Fi 恢復、持續播放及完整 UI | 待驗收；協定回報不等同畫面／聲音或完整 UI 驗收 |
-| 較早原始碼測試（建置 3） | iOS 18.6 與 26.5 各 78 項通過；[上輪紀錄](artifacts/fixes-2026-10-24.md) |
-| 公開分發 | 尚無公開安裝包、App Store 或 TestFlight 版本 |
+| [Webcast-0.1.2-iOS-unsigned.ipa](https://github.com/ycl-2004/Webcast/releases/download/v0.1.2/Webcast-0.1.2-iOS-unsigned.ipa) | arm64、iOS 16+；未簽名，需自行簽名 |
+| [Webcast-0.1.2-Simulator.zip](https://github.com/ycl-2004/Webcast/releases/download/v0.1.2/Webcast-0.1.2-Simulator.zip) | Xcode iOS 模擬器 App；arm64 + x86_64，ad-hoc 簽名 |
+| [Webcast-0.1.2-ThirdPartyNotices.zip](https://github.com/ycl-2004/Webcast/releases/download/v0.1.2/Webcast-0.1.2-ThirdPartyNotices.zip) | 固定版本 Google Cast SDK 隨附的第三方授權聲明 |
+| [release-manifest.json](https://github.com/ycl-2004/Webcast/releases/download/v0.1.2/release-manifest.json) | 版本、工具鏈、架構、原始碼雜湊與包檢查結果 |
+| [SHA256SUMS](https://github.com/ycl-2004/Webcast/releases/download/v0.1.2/SHA256SUMS) | 以上四個檔案的 SHA-256 校驗值 |
 
-2026-10-18 的原始碼修復另見 [F1–F6 修復紀錄](artifacts/fixes-2026-10-18.md)；那些歷史建置尚未安裝到手機或逐項完成接收端驗收；目前建置 4 的核心協定結果另見上表。
+本次重新建置的模擬器與 arm64 iPhone Release 均通過實際包檢查。從模擬器 ZIP 解壓縮的 App 已在 Apple Silicon／iOS 18.6 安裝並啟動。[GitHub CI](https://github.com/ycl-2004/Webcast/actions/runs/40733499670) 已通過相同 App 原始碼的測試與 Release 檢查。
 
-後續基礎改進見[本機品質檢查](artifacts/foundation-2026-10-18.md)：瀏覽器僅在首次進入時載入頁面，確認接收端正在播放所選內容後才暫停手機影片。本機測試與元件渲染不取代接收端驗收。
+先前的實機證據：另行簽名的 **0.1.2 (4)** 已在實體 iPhone 15／iOS 26.5 → Chromecast 通過核心 HLS 播放、暫停、跳轉、恢復、靜音、停止與中斷連線。[真機測試](artifacts/iphone-receiver-2026-10-26.json) · [安裝紀錄](artifacts/iphone-2026-10-26.json)。該個人開發描述檔有效至 2026-11-02，不包含在公開套件中。
 
-持續瀏覽的資源上限、換頁回歸、投屏畫質資訊與公開介面精簡見[穩定性檢查](artifacts/stability-2026-10-18.md)。
-
-詳見[驗證紀錄](artifacts/validation.md)、[實作檢查](artifacts/review-2026-10-07.md)及[接收端驗收清單](docs/FEASIBILITY.md)。圖示更新沒有改變 App 行為，因此未重新執行測試。
+完整瀏覽器至電視介面、畫面／聲音確認、鎖屏與 Wi-Fi 恢復、長時間播放、最低 iOS 版本及實體 iPad 驗收仍待完成。見[驗收清單](docs/ACCEPTANCE.md)與[加固紀錄](artifacts/hardening-2026-10-26.md)。較早的工程證據可由[驗證紀錄](artifacts/validation.md)查閱。
 
 ## 常見問題
 
@@ -158,7 +157,7 @@ Personal Team 的佈建描述檔會在七天後到期，屆時需要用自己的
 <details>
 <summary>需求、本機簽名、建置與驗證指令</summary>
 
-需要安裝 Xcode 與 iOS SDK 的 Mac，並確保 `PATH` 中可使用 XcodeGen。本機驗證使用 Xcode **27.1**。CI 明確選用 Xcode **26.3** 與 iOS **18.6** 模擬器；推送後仍需確認遠端結果。Google Cast 使用官方 **4.8.6** 動態框架，由 [`Packages/GoogleCast/Package.swift`](Packages/GoogleCast/Package.swift) 的版本網址與校驗碼固定。這份僅含二進位框架的 SPM 描述檔避免官方包裝套件重複連結類別（[決策紀錄](docs/decisions/002-media-origin-and-official-sdk.md)）；首次建置需要連線下載相依套件。
+需要安裝 Xcode 與 iOS SDK 的 Mac，並確保 `PATH` 中可使用 XcodeGen。本機驗證使用 Xcode **27.1**。CI 明確選用 Xcode **26.3** 與 iOS **18.6** 模擬器；[建置原始碼的 CI](https://github.com/ycl-2004/Webcast/actions/runs/40733499670) 已通過。Google Cast 使用官方 **4.8.6** 動態框架，由 [`Packages/GoogleCast/Package.swift`](Packages/GoogleCast/Package.swift) 的版本網址與校驗碼固定。這份僅含二進位框架的 SPM 描述檔避免官方包裝套件重複連結類別（[決策紀錄](docs/decisions/002-media-origin-and-official-sdk.md)）；首次建置需要連線下載相依套件。
 
 ```sh
 git clone https://github.com/ycl-2004/Webcast.git
@@ -187,6 +186,7 @@ DEVICE_UDID := <YOUR_DEVICE_UDID>
 make build           # 未簽名的模擬器 Release
 make check-release   # 建置 Release 並檢查資源、隱私清單與除錯隔離（需 Python 3）
 make release         # 未簽名的實體裝置 Release，不安裝
+python3 scripts/package_release.py --output artifacts/Release/v0.1.2  # 打包兩個 Release；輸出檔名不可已存在
 make device-build    # 簽名的實體裝置 Release，不安裝
 make device-install  # 建置並安裝，不啟動 App
 make device          # 建置、安裝並啟動 App
@@ -232,7 +232,9 @@ make demo SIMULATOR_ID='<BOOTED_SIMULATOR_UUID>'
 
 在 `project.yml` 更新 `CFBundleShortVersionString` 與 `CFBundleVersion`，再執行 `make generate`，同步 `Webcast/Info.plist` 與產生的專案。文件也應對齊實際建置。
 
-目前沒有發布標籤或公開安裝檔。本機簽名檔、裝置識別碼、產生的專案與 App 套件均不納入 Git。公開 iOS 分發需要另行設定簽名與發布方式。
+發布標籤採 `v<version>`，首個為 `v0.1.2`。GitHub 發布附上含版本的未簽名 IPA、模擬器 ZIP、SDK 授權聲明、`release-manifest.json` 與 `SHA256SUMS`。清單記錄建置原始碼的提交與產品檔案雜湊；發布文件可於打包後提交，而不改動 App。見[重現打包指令（英文）](docs/releases/0.1.2.md#reproduce-the-packages)。
+
+本機簽名檔、裝置識別碼、產生的專案與 App 套件均不納入 Git。公開套件不含個人佈建描述檔。App Store／TestFlight 分發需要另行設定簽名與發布方式。
 
 ## 參與與回報
 
@@ -245,7 +247,7 @@ make demo SIMULATOR_ID='<BOOTED_SIMULATOR_UUID>'
 - DRM 偵測只能盡力辨識。未標記不代表串流沒有 DRM。
 - 尚未實作字幕、佇列、廣告過濾、瀏覽歷史與書籤。
 - 個別遙控操作、指定爱壹帆集數、鎖定畫面恢復、Wi-Fi 恢復，以及實體 iPad 使用尚未完整驗證。
-- Personal Team 安裝需要定期重新簽名；目前沒有自動更新或公開安裝包。
+- Personal Team 安裝需要定期重新簽名；目前沒有自動更新、App Store 或 TestFlight 版本；公開 IPA 需自行簽名。
 
 ## 授權
 
