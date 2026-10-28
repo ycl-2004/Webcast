@@ -12,6 +12,7 @@ enum SettingsKeys {
     static let defaultHome = "https://www.iyf.tv"
     static let lastTab = "state.lastTab"
     static let lastURL = "state.lastURL"
+    static let lastCastDevice = "state.lastCastDevice"
 }
 
 struct SettingsView: View {
@@ -71,19 +72,18 @@ struct SettingsView: View {
             }
 
             Section {
-                Button(clearingData ? "正在清除…" : "清除网站数据", role: .destructive) { confirmClear = true }
+                Button(clearingData ? String(localized: "正在清除…") : String(localized: "清除网站数据"), role: .destructive) { confirmClear = true }
                     .disabled(clearingData)
                 if dataCleared {
                     Label("网站数据已清除", systemImage: "checkmark.circle")
                         .font(.footnote).foregroundStyle(.secondary)
                 }
                 if clearError { Text("清除未完成，请重试。").font(.footnote).foregroundStyle(.red) }
-            } footer: {
-                Text("清除后需重新登录网站。")
             }
 
             Section("关于") {
-                LabeledContent("版本", value: appVersion)
+                LabeledContent("版本", value: AppBuild.version)
+                NavigationLink("投屏诊断") { CastDiagnosticsView() }
             }
 
             #if DEBUG
@@ -101,12 +101,6 @@ struct SettingsView: View {
         }
     }
 
-    private var appVersion: String {
-        let short = Bundle.main.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String ?? "0"
-        let build = Bundle.main.object(forInfoDictionaryKey: "CFBundleVersion") as? String ?? "0"
-        return "\(short) (\(build))"
-    }
-
     private func clearWebsiteData() {
         clearingData = true
         dataCleared = false
@@ -120,7 +114,7 @@ struct SettingsView: View {
 
     private func saveHomeURL() {
         guard let url = BrowserAddress.resolve(homeURLString) else {
-            homeError = "请输入有效的网址。"
+            homeError = String(localized: "请输入有效的网址。")
             return
         }
         homeError = nil

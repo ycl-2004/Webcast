@@ -1,0 +1,10 @@
+Intermediate iOS 18.6 run (2026-10-24), corrected binary-only SDK.
+The run reached 78 tests with one timeout; interruption left its xcresult incomplete.
+Retained raw log excerpts:
+
+Test Case '-[WebcastTests.SnifferIntegrationTests testOldFetchAndXHRDoNotReappearAfterReturningToSameRoute]' started.
+2026-10-24 21:02:01.018310-0700 Webcast[62375:14542703] [Process] WebContent process (0x7020007000) took 3.990314 seconds to launch
+<unknown>:0: error: -[WebcastTests.SnifferIntegrationTests testOldFetchAndXHRDoNotReappearAfterReturningToSameRoute] : Asynchronous wait failed: Exceeded timeout of 10 seconds, with unfulfilled expectations: "route A B A rejects stale responses".
+Test Case '-[WebcastTests.SnifferIntegrationTests testOldFetchAndXHRDoNotReappearAfterReturningToSameRoute]' failed (10.791 seconds).
+	 Executed 78 tests, with 1 failure (0 unexpected) in 127.797 (128.031) seconds
+	 Executed 78 tests, with 1 failure (0 unexpected) in 127.797 (128.033) seconds

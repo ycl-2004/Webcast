@@ -1,0 +1,69 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    name: Simulator tests and Release bundle
+    runs-on: macos-15
+    timeout-minutes: 45
+    env:
+      WEBCAST_OFFLINE_VALIDATION: "1"
+      DEVELOPER_DIR: /Applications/Xcode_26.3.app/Contents/Developer
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Record toolchain
+        run: |
+          xcodebuild -version
+          xcrun simctl list runtimes
+      - name: Install xcodegen
+        run: brew install xcodegen
+      - name: Generate project
+        run: make generate
+      - name: Pick a simulator
+        id: sim
+        run: |
+          xcrun simctl list devices available --json > "$RUNNER_TEMP/simulators.json"
+          python3 - <<'PY'
+          import json, os, re
+          with open(os.path.join(os.environ['RUNNER_TEMP'], 'simulators.json')) as handle:
+              runtimes = json.load(handle)['devices']
+          ios = [key for key in runtimes if key.endswith('.iOS-18-6')]
+          ios.sort(key=lambda key: tuple(map(int, re.findall(r'\d+', key))), reverse=True)
+          choices = [device for key in ios for device in runtimes[key]
+                     if device.get('isAvailable') and device['name'].startswith('iPhone')]
+          if not choices:
+              raise SystemExit('Required iOS 18.6 iPhone simulator is unavailable')
+          with open(os.environ['GITHUB_OUTPUT'], 'a') as output:
+              output.write('id=' + choices[0]['udid'] + '\n')
+          PY
+      - name: Test
+        run: |
+          set -o pipefail
+          # Hosted runners cold-start WebKit slowly enough to stall the first page loads now and then;
+          # rerun only failing tests, so a real regression still fails every attempt.
+          make test SIMULATOR_ID='${{ steps.sim.outputs.id }}' \
+            TEST_ARGS='-retry-tests-on-failure -test-iterations 3' | tee "$RUNNER_TEMP/webcast-tests.log"
+      - name: Verify Release bundle
+        run: |
+          set -o pipefail
+          make check-release | tee "$RUNNER_TEMP/webcast-release.log"
+      - name: Retain test evidence
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: webcast-validation
+          path: |
+            .build/Logs/Test/*.xcresult
+            ${{ runner.temp }}/webcast-tests.log
+            ${{ runner.temp }}/webcast-release.log
+          include-hidden-files: true
+          retention-days: 7

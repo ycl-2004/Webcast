@@ -1,0 +1,13 @@
+{
+  "version": "0.1.2",
+  "build": "4",
+  "configuration": "Release",
+  "installedOn": "physical iPhone 15",
+  "signature": "verified",
+  "profileExpiresUTC": "2026-11-02T15:17:50Z",
+  "sourceUnchanged": true,
+  "launch": "verified successful on physical phone after restoring Release",
+  "physicalReceiverAcceptance": "passed; see iphone-receiver-2026-10-26.json",
+  "developerTrust": "completed by user",
+  "restoredReleaseAfterTests": true
+}

@@ -11,7 +11,7 @@
 <p align="center">
   <img src="https://img.shields.io/badge/status-source%20build-111111" alt="目前提供原始碼建置，沒有公開安裝包">
   <img src="https://img.shields.io/badge/iOS-16.0%2B-111111?logo=apple&amp;logoColor=white" alt="iOS 16.0 或以上版本">
-  <img src="https://img.shields.io/badge/version-0.1.1%20%282%29-111111" alt="目前版本 0.1.1，建置編號 2">
+  <img src="https://img.shields.io/badge/version-0.1.2%20%284%29-111111" alt="目前原始碼版本 0.1.2，建置編號 4">
   <img src="https://img.shields.io/badge/SwiftUI-WKWebView-F05138?logo=swift&amp;logoColor=white" alt="使用 SwiftUI 與 WKWebView">
   <img src="https://img.shields.io/badge/Google%20Cast-4.8.6-111111" alt="Google Cast SDK 4.8.6">
 </p>
@@ -27,7 +27,7 @@
 
 Webcast 是原生 iOS 瀏覽器與 Chromecast 遙控器，適合想把網頁影片放到大螢幕觀看的人。開啟網站並播放影片，再選擇偵測到的串流投到電視。電視直接取得影片串流，手機負責瀏覽與播放控制。
 
-> **目前分發狀態：** 僅提供原始碼建置，尚無 App Store、TestFlight 或公開安裝包。帶有新水彩圖示的 Release **0.1.1 (2)** 已於 **2026-10-07** 使用 Apple Development／Personal Team 簽名，並安裝到 iPhone 15。使用者已回報電視播放成功；個別遙控操作、鎖定畫面與 Wi-Fi 恢復仍待逐項驗收。[驗證紀錄](artifacts/validation.md)。
+> **目前分發狀態：** 僅提供原始碼建置，尚無 App Store、TestFlight 或公開安裝包。本機簽名的 Release **0.1.2 (4)** 已安裝至 iPhone 15 並確認可啟動；該手機與 Chromecast 的核心播放及遙控已通過驗收，瀏覽器介面、鎖定畫面與 Wi-Fi 恢復仍待驗收。[驗收清單](docs/ACCEPTANCE.md)。
 
 ## 快速開始
 
@@ -47,7 +47,7 @@ Webcast 是原生 iOS 瀏覽器與 Chromecast 遙控器，適合想把網頁影�
 - Chromecast 或支援 Google Cast 的接收端，與手機使用同一個 Wi-Fi。
 - 本機網路權限，用於裝置探索與投屏。
 - 網頁與遠端影片來源需要網際網路連線。
-- 目前 App 介面使用簡體中文；本文保留按鈕的實際文字。已設定 iPad 目標，但尚無實體 iPad 驗收紀錄。
+- App 包含英文、簡體中文與繁體中文本地化；各語言的人工驗收仍待完成。本文以簡體中文介面文字為例。已設定 iPad 目標，但尚無實體 iPad 驗收紀錄。
 
 ## 為什麼使用 Webcast
 
@@ -69,10 +69,13 @@ Webcast 是原生 iOS 瀏覽器與 Chromecast 遙控器，適合想把網頁影�
 - 辨識 HLS、MP4 候選項目；可取得資訊時顯示目前影片、來源、時長與直播狀態。
 - 保留簽名網址參數、移除重複候選項目，並停用已辨識為 DRM 保護的項目。
 - 分開標示推測的 MSE 候選項目；**`可能是正片`** 是估計結果，請核對來源與時長。
+- 優先排列目前影片，再優先主播放清單；未知時長與直播分開處理。
 
 **Chromecast 遙控**
 
-- 探索接收端並選擇電視。
+- 探索接收端並選擇電視；用過的電視在線時，點 **`投到 <電視>`** 即可一步連線並投放。
+- App 開著時手機音量鍵直接調整電視音量；前台持續探索裝置，讓 Cast SDK 在解鎖或重新開啟 App 後恢復連線（尚未在電視上驗收）。
+- App 進入背景時會暫停 Cast 連線並清除系統媒體控制，不支援持續鎖定畫面遙控；請回到 App 恢復。電視自行取得串流，播放連續性與重新連線仍待實體驗收。
 - 播放／暫停、調整進度、前後跳轉 15 秒、音量、靜音、停止與中斷連線。
 - 顯示連線及播放狀態，包括載入與連線中斷。以上控制已實作，完整實體裝置驗收仍待完成。
 
@@ -82,7 +85,7 @@ Webcast 是原生 iOS 瀏覽器與 Chromecast 遙控器，適合想把網頁影�
 
 Webcast 將選定網址與媒體資訊傳給 Google 的 Default Media Receiver。它不會鏡像手機畫面，也不會讓影片透過手機代理轉送。
 
-**`断开连接`** 會中斷手機連線，不要求電視停止播放；**`停止并断开`** 會要求電視停止後再中斷連線。兩個操作分開提供。
+**`停止并断开`** 會先要求確認，再要求電視停止播放並中斷手機連線。目前不提供保留電視播放的中斷連線：只有一個傳送端時，即使停止參數為 false，Cast SDK 仍會停止播放。[Google Cast API 說明](https://developers.google.com/cast/docs/reference/ios/interface_g_c_k_session_manager)。
 
 ## 畫面截圖
 
@@ -100,19 +103,30 @@ Webcast 將選定網址與媒體資訊傳給 Google 的 Default Media Receiver�
 - Webcast 沒有 App 帳號或專案自營後端。設定、上次瀏覽網址與上次選擇的分頁儲存在本機。
 - WebKit 在裝置上儲存網站 Cookie、快取與其他網站資料。**`设置 → 清除网站数据`** 會清除這些資料及已儲存的上次網址；之後需要重新登入網站。
 - 開啟網頁與搜尋會連線到指定網站或搜尋引擎。投屏會將媒體網址、標題與來源主機名稱傳給接收端，再由接收端直接取得影片。
+- **設定 → 投放診斷** 僅在記憶體保留本次執行最近 20 筆失敗：階段、數值錯誤代碼、時間、版本、接收端型號及來源網域。不包含完整媒體網址、Cookie 或頁面內容，不會上傳，可手動清除，App 程序結束後即清空。
 - App 設定已停用 Google Cast SDK 的分析記錄；Release 也停用詳細 SDK 除錯記錄。
+- App 自身包含本機 UserDefaults 偏好的隱私清單，Google Cast 保留獨立的 SDK 清單。
 - 網站、搜尋引擎、影片主機與 Google Cast 元件各有自己的網路與資料行為。Webcast 需要網路，也不會讓第三方流量變成私密流量。
 
 ## 目前建置
 
-**0.1.1 (2)** 是 [`project.yml`](project.yml) 中的目前版本，包含瀏覽器、影片偵測、Chromecast 遙控、設定與水彩 App 圖示。
+**0.1.2 (4)** 是 [`project.yml`](project.yml) 中的目前原始碼版本，加入隔離的原生偵測橋、訊息欄位與頻率限制、前台連線等待逾時。以 iOS 模擬器作傳送端，目前 `CastManager` 已通過真實 Chromecast 的公開 HLS 播放與遙控驗收。簽名 Release 已安裝並確認可在 iPhone 15 啟動；實體 iPhone 15（iOS 26.5）→ Chromecast 核心播放與遙控驗收已通過。簽名有效至 2026-11-02。[安裝紀錄](artifacts/iphone-2026-10-26.json)。請參閱[本輪修正與驗證紀錄](artifacts/hardening-2026-10-26.md)與[本版驗收清單](docs/ACCEPTANCE.md)。
 
 | 證據 | 結果 |
 | --- | --- |
-| 簽名 iPhone Release 建置 | 建置與簽名驗證通過，已安裝到 iPhone 15 |
-| 自動化驗證 | 20 項通過，0 項失敗，0 項略過；紀錄早於僅更換圖示的更新 |
-| 電視實際播放 | 使用者回報成功；尚未記錄來源與個別遙控結果 |
+| 歷史簽名 iPhone Release 建置 | 0.1.1 (2)，於 2026-10-07 安裝到 iPhone 15 |
+| 目前離線回歸與 Release 證據 | 各系統測試數量與包檢查結果見[建置 4 紀錄](artifacts/hardening-2026-10-26.md) |
+| 目前 CastManager → 真實 Chromecast | HLS 載入確認、時間推進、暫停、跳轉、恢復、靜音切換、停止、還原音量與斷開通過；iOS 26.5 模擬器與實體 iPhone 15 均通過 |
+| 實體 iPhone | 核心 SDK 播放／遙控通過；[真機證據](artifacts/iphone-receiver-2026-10-26.json)。測試後已還原並啟動 Release |
+| 鎖屏、Wi-Fi 恢復、持續播放及完整 UI | 待驗收；協定回報不等同畫面／聲音或完整 UI 驗收 |
+| 較早原始碼測試（建置 3） | iOS 18.6 與 26.5 各 78 項通過；[上輪紀錄](artifacts/fixes-2026-10-24.md) |
 | 公開分發 | 尚無公開安裝包、App Store 或 TestFlight 版本 |
+
+2026-10-18 的原始碼修復另見 [F1–F6 修復紀錄](artifacts/fixes-2026-10-18.md)；那些歷史建置尚未安裝到手機或逐項完成接收端驗收；目前建置 4 的核心協定結果另見上表。
+
+後續基礎改進見[本機品質檢查](artifacts/foundation-2026-10-18.md)：瀏覽器僅在首次進入時載入頁面，確認接收端正在播放所選內容後才暫停手機影片。本機測試與元件渲染不取代接收端驗收。
+
+持續瀏覽的資源上限、換頁回歸、投屏畫質資訊與公開介面精簡見[穩定性檢查](artifacts/stability-2026-10-18.md)。
 
 詳見[驗證紀錄](artifacts/validation.md)、[實作檢查](artifacts/review-2026-10-07.md)及[接收端驗收清單](docs/FEASIBILITY.md)。圖示更新沒有改變 App 行為，因此未重新執行測試。
 
@@ -144,7 +158,7 @@ Personal Team 的佈建描述檔會在七天後到期，屆時需要用自己的
 <details>
 <summary>需求、本機簽名、建置與驗證指令</summary>
 
-需要安裝 Xcode 與 iOS SDK 的 Mac，並確保 `PATH` 中可使用 XcodeGen。本專案已使用 Xcode 27.0 建置。Google Cast 固定為 `SRGSSR/google-cast-sdk` **4.8.6**；首次建置需要連線下載相依套件。
+需要安裝 Xcode 與 iOS SDK 的 Mac，並確保 `PATH` 中可使用 XcodeGen。本機驗證使用 Xcode **27.1**。CI 明確選用 Xcode **26.3** 與 iOS **18.6** 模擬器；推送後仍需確認遠端結果。Google Cast 使用官方 **4.8.6** 動態框架，由 [`Packages/GoogleCast/Package.swift`](Packages/GoogleCast/Package.swift) 的版本網址與校驗碼固定。這份僅含二進位框架的 SPM 描述檔避免官方包裝套件重複連結類別（[決策紀錄](docs/decisions/002-media-origin-and-official-sdk.md)）；首次建置需要連線下載相依套件。
 
 ```sh
 git clone https://github.com/ycl-2004/Webcast.git
@@ -171,17 +185,24 @@ DEVICE_UDID := <YOUR_DEVICE_UDID>
 
 ```sh
 make build           # 未簽名的模擬器 Release
+make check-release   # 建置 Release 並檢查資源、隱私清單與除錯隔離（需 Python 3）
 make release         # 未簽名的實體裝置 Release，不安裝
 make device-build    # 簽名的實體裝置 Release，不安裝
 make device-install  # 建置並安裝，不啟動 App
 make device          # 建置、安裝並啟動 App
 ```
 
-使用已安裝的 iPhone 模擬器執行測試：
+先列出已安裝的模擬器，再用選定的 UUID 執行測試：
 
 ```sh
-make test SIMULATOR='iPhone 16 Pro'
+xcrun simctl list devices available
+make test SIMULATOR_ID='<SIMULATOR_UUID>'
+
+# 也可以指定裝置名稱及其已安裝的 iOS 版本：
+make test SIMULATOR='iPhone 16 Pro' SIMULATOR_OS=18.6
 ```
+
+`SIMULATOR_ID` 優先於名稱與系統版本；未提供 UUID 時，預設為 `iPhone 17` 與 `latest`。若安裝多套執行環境，請指定與裝置名稱對應的系統版本。
 
 若要開啟內建 HLS 範例，請先啟動模擬器，再填入其 UUID：
 

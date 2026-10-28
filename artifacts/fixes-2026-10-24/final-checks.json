@@ -1,0 +1,15 @@
+{
+  "result": "Passed",
+  "sourceSnapshotFiles": 38,
+  "uiLocalizedKeys": 136,
+  "checks": [
+    "source snapshot matches final files",
+    "final test result counts",
+    "both Release identities and package gates",
+    "plist and JSON parsing",
+    "English and Traditional Chinese coverage",
+    "local Markdown links",
+    "JavaScript syntax",
+    "git diff --check"
+  ]
+}

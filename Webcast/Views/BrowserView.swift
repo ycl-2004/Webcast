@@ -46,6 +46,7 @@ struct BrowserView: View {
         }
         #endif
         .onChange(of: editingAddress) { browser.isEditingAddress = $0 }
+        .onAppear { browser.startIfNeeded() }
     }
 
     private var addressBar: some View {
@@ -59,7 +60,7 @@ struct BrowserView: View {
             if !browser.address.isEmpty {
                 Button { browser.address = "" } label: {
                     Image(systemName: "xmark.circle.fill").foregroundStyle(.tertiary)
-                }.accessibilityLabel("清空地址")
+                }.frame(width: 44, height: 44).accessibilityLabel("清空地址")
             }
             Button { browser.openAddress(); editingAddress = false } label: {
                 Image(systemName: "arrow.right.circle.fill").font(.title2)
@@ -97,22 +98,27 @@ private struct StartPageView: View {
     @ObservedObject var browser: BrowserModel
 
     var body: some View {
-        VStack(spacing: 0) {
-            Spacer(minLength: 48)
-            Image(systemName: "tv")
-                .font(.system(size: 52, weight: .light)).foregroundStyle(.teal)
-                .padding(.bottom, 12)
-            Text("Webcast").font(.title2.weight(.semibold))
-            Text("打开网页，播放视频，再投到电视")
-                .font(.subheadline).foregroundStyle(.secondary).padding(.top, 4)
-            VStack(spacing: 12) {
-                shortcut(icon: "play.tv", title: browser.homeTitle, subtitle: browser.homeURL.host ?? "",
-                         action: browser.openHome)
+        GeometryReader { geometry in
+            ScrollView {
+                VStack(spacing: 0) {
+                    Spacer(minLength: 48)
+                    Image(systemName: "tv")
+                        .font(.system(size: 52, weight: .light)).foregroundStyle(.teal)
+                        .padding(.bottom, 12)
+                    Text("Webcast").font(.title2.weight(.semibold))
+                    Text("打开网页，播放视频，再投到电视")
+                        .font(.subheadline).foregroundStyle(.secondary).padding(.top, 4)
+                    VStack(spacing: 12) {
+                        shortcut(icon: "play.tv", title: browser.homeTitle, subtitle: browser.homeURL.host ?? "",
+                                 action: browser.openHome)
+                    }
+                    .padding(.horizontal, 36).padding(.top, 32)
+                    Spacer(minLength: 48)
+                }
+                .frame(maxWidth: .infinity)
+                .frame(minHeight: geometry.size.height)
             }
-            .padding(.horizontal, 36).padding(.top, 32)
-            Spacer(minLength: 48)
         }
-        .frame(maxWidth: .infinity)
         .background(Color(uiColor: .systemBackground))
     }
 

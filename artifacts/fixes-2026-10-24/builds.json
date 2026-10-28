@@ -1,0 +1,20 @@
+{
+  "simulator": {
+    "path": ".build-final-release/Build/Products/Release-iphonesimulator/Webcast.app",
+    "platform": "iphonesimulator",
+    "minimumOS": "16.0",
+    "version": "0.1.2",
+    "build": "3",
+    "signingAllowed": false,
+    "executableSHA256": "da1b51f9e34ead32923ebb2d3c9a84fb97078858919fb4c10d8885ddc03ae93f"
+  },
+  "device": {
+    "path": ".build-final-device/Build/Products/Release-iphoneos/Webcast.app",
+    "platform": "iphoneos",
+    "minimumOS": "16.0",
+    "version": "0.1.2",
+    "build": "3",
+    "signingAllowed": false,
+    "executableSHA256": "a4ea4657d7a5c663109be90f0a9c06fc54a44ed7cddffada157c1c00fdc0ee8b"
+  }
+}

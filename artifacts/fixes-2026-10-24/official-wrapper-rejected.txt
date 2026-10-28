@@ -1,0 +1,1 @@
+Release bundle validation failed: Duplicate Objective-C class: GTMSessionUploadFetcher

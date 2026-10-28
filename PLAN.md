@@ -1,5 +1,8 @@
 # Webcast — 自用无广告的网页视频投屏 App（iPhone → Chromecast）
 
+> **历史设计稿，不是当前待办或验收状态（2026-10-24 校正）。** 下文保留早期假设与勾选状态，不能据此认为代理已实现、所有目标站可播或当前版本已在真机验证。当前源码为 0.1.2 (3)，使用官方 Google Cast 4.8.6 动态二进制及本地 SPM 描述、iOS 16+、三个标签页；无本地代理，也无后台保活。锁屏后返回前台恢复属于待真机验收项。当前行为见 [README](README.md)，设计修订见 [ADR 002](docs/decisions/002-media-origin-and-official-sdk.md)，未完成的硬件检查见 [验收清单](docs/ACCEPTANCE.md)。
+
+
 ## Context（为什么做）
 
 用户家里电视通过 Chromecast 观看视频，但 iPhone 上目前只有 YouTube 能投。

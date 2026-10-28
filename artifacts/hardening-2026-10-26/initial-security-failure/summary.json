@@ -1,0 +1,9 @@
+{
+  "source": "XcodeBuildMCP test_sim tool summary",
+  "passedTests": 6,
+  "failedTests": 1,
+  "totalTestCount": 7,
+  "failedTest": "testPageWorldFetchStillReachesIsolatedBridge",
+  "reason": "fixture re-added removed WKUserScript instances; WebKit trapped in addUserScript",
+  "rawResultBundle": "tool temporary result bundle unavailable after tool returned; do not claim retained xcresult"
+}

@@ -1,0 +1,3 @@
+Candidate bound: inserted=150, retained=150, intendedLimit=100
+Ranking: first=old-ad.m3u8, current=false
+Multi-frame current: frame one still uses shared.mp4, markedCurrent=false

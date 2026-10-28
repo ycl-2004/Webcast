@@ -1,0 +1,25 @@
+{
+  "build": "0.1.2 (4)",
+  "checks": [
+    "discovery",
+    "connection",
+    "HLS playing and load confirmed",
+    "position advancing",
+    "pause",
+    "seek",
+    "resume",
+    "mute/unmute",
+    "stop",
+    "volume restored and disconnected"
+  ],
+  "diagnosticStages": [],
+  "discoveredReceiverCount": 1,
+  "error": "",
+  "result": "passed",
+  "scope": "physical iPhone 15 (iOS 26.5) -> physical Chromecast",
+  "testSummary": {
+    "passed": 1,
+    "failed": 0,
+    "skipped": 0
+  }
+}
