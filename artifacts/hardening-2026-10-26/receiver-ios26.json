@@ -1,0 +1,20 @@
+{
+  "build": "0.1.2 (4)",
+  "checks": [
+    "discovery",
+    "connection",
+    "HLS playing and load confirmed",
+    "position advancing",
+    "pause",
+    "seek",
+    "resume",
+    "mute/unmute",
+    "stop",
+    "volume restored and disconnected"
+  ],
+  "diagnosticStages": [],
+  "discoveredReceiverCount": 1,
+  "error": "",
+  "result": "passed",
+  "scope": "current app CastManager -> physical receiver (simulator or iPhone per test destination)"
+}

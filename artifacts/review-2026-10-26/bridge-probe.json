@@ -1,0 +1,10 @@
+{
+  "forgedCandidateHost" : "cdn.invalid",
+  "forgedRestoreGenerationAccepted" : true,
+  "noVideoElementForgedCurrentAccepted" : true,
+  "platform" : "macOS WKWebView; unchanged native ingestion code",
+  "privateHTTPMediaAddressAccepted" : true,
+  "receiverContacted" : false,
+  "retainedSegmentFormatBytes" : 1048576,
+  "retainedSourceBytes" : 1048576
+}

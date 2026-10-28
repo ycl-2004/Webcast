@@ -1,0 +1,15 @@
+{
+  "fixture": "Playing video A, then assign src to a paused detached preload B",
+  "reports": [
+    {
+      "url": "https://cdn.example/playing.mp4",
+      "current": true
+    },
+    {
+      "url": "https://cdn.example/not-playing.mp4",
+      "current": true
+    }
+  ],
+  "lastCurrent": "https://cdn.example/not-playing.mp4",
+  "preloadIsPaused": true
+}

@@ -1,0 +1,6 @@
+Observed crash report: Webcast-2026-10-26-072951.ips
+EXC_BREAKPOINT / SIGTRAP
+WebKit::WebUserContentControllerProxy::addUserScript
+-[WKUserContentController addUserScript:]
+SnifferSecurityTests.testPageWorldFetchStillReachesIsolatedBridge
+Fixture corrected to construct fresh WKUserScript objects after removal.

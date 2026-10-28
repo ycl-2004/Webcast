@@ -1,0 +1,65 @@
+{
+  "scope": "receiver protocol test from macOS Python, not the iOS app",
+  "checks": [
+    {
+      "name": "HLS playing",
+      "result": "passed",
+      "seconds": 8.9
+    },
+    {
+      "name": "HLS position advancing",
+      "result": "passed",
+      "seconds": 1.21
+    },
+    {
+      "name": "HLS paused",
+      "result": "passed",
+      "seconds": 0.0
+    },
+    {
+      "name": "HLS seek",
+      "result": "passed",
+      "seconds": 0.0
+    },
+    {
+      "name": "HLS resumed",
+      "result": "passed",
+      "seconds": 1.61
+    },
+    {
+      "name": "HLS volume",
+      "result": "passed",
+      "seconds": 0.0
+    },
+    {
+      "name": "HLS muted",
+      "result": "passed",
+      "seconds": 0.0
+    },
+    {
+      "name": "HLS unmuted",
+      "result": "passed",
+      "seconds": 0.0
+    },
+    {
+      "name": "HLS stopped",
+      "result": "passed",
+      "seconds": 0.0
+    },
+    {
+      "name": "cleanup media stopped",
+      "result": "passed",
+      "seconds": 0.0
+    },
+    {
+      "name": "original volume/mute restored",
+      "result": "passed",
+      "seconds": 0.0
+    }
+  ],
+  "connected": true,
+  "model": "Chromecast",
+  "initialAppID": "CC1AD845",
+  "result": "passed",
+  "cleanup": "passed"
+}

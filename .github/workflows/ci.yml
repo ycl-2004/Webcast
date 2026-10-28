@@ -10,15 +10,20 @@ permissions:
 
 jobs:
   test:
-    name: Unit tests (iOS Simulator)
+    name: Simulator tests and Release bundle
     runs-on: macos-15
     timeout-minutes: 45
     env:
       WEBCAST_OFFLINE_VALIDATION: "1"
+      DEVELOPER_DIR: /Applications/Xcode_26.3.app/Contents/Developer
     steps:
       - uses: actions/checkout@v4
         with:
           persist-credentials: false
+      - name: Record toolchain
+        run: |
+          xcodebuild -version
+          xcrun simctl list runtimes
       - name: Install xcodegen
         run: brew install xcodegen
       - name: Generate project
@@ -26,19 +31,36 @@ jobs:
       - name: Pick a simulator
         id: sim
         run: |
-          SIM="$(xcrun simctl list devices available |
-            sed -nE 's/^\s*iPhone[^(:]*\(([A-F0-9-]{36})\).*/\1/p' |
-            head -1)"
-          test -n "$SIM" || { echo "No iPhone simulator found"; exit 1; }
-          echo "id=$SIM" >> "$GITHUB_OUTPUT"
+          xcrun simctl list devices available --json > "$RUNNER_TEMP/simulators.json"
+          python3 - <<'PY'
+          import json, os, re
+          with open(os.path.join(os.environ['RUNNER_TEMP'], 'simulators.json')) as handle:
+              runtimes = json.load(handle)['devices']
+          ios = [key for key in runtimes if key.endswith('.iOS-18-6')]
+          ios.sort(key=lambda key: tuple(map(int, re.findall(r'\d+', key))), reverse=True)
+          choices = [device for key in ios for device in runtimes[key]
+                     if device.get('isAvailable') and device['name'].startswith('iPhone')]
+          if not choices:
+              raise SystemExit('Required iOS 18.6 iPhone simulator is unavailable')
+          with open(os.environ['GITHUB_OUTPUT'], 'a') as output:
+              output.write('id=' + choices[0]['udid'] + '\n')
+          PY
       - name: Test
         run: |
           set -o pipefail
-          xcodebuild -project Webcast.xcodeproj \
-            -scheme Webcast -configuration Debug \
-            -destination "platform=iOS Simulator,\
-              id=${{ steps.sim.outputs.id }}" \
-            -derivedDataPath .build \
-            SYMROOT=.build/Build/Products \
-            OBJROOT=.build/Build/Intermediates.noindex \
-            CODE_SIGNING_ALLOWED=NO test | tail -50
+          make test SIMULATOR_ID='${{ steps.sim.outputs.id }}' | tee "$RUNNER_TEMP/webcast-tests.log"
+      - name: Verify Release bundle
+        run: |
+          set -o pipefail
+          make check-release | tee "$RUNNER_TEMP/webcast-release.log"
+      - name: Retain test evidence
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: webcast-validation
+          path: |
+            .build/Logs/Test/*.xcresult
+            ${{ runner.temp }}/webcast-tests.log
+            ${{ runner.temp }}/webcast-release.log
+          include-hidden-files: true
+          retention-days: 7

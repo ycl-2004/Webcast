@@ -1,0 +1,107 @@
+[
+  {
+    "file": "Webcast/Browser/BrowserModel.swift",
+    "sha256": "d325a3a4e91e216d5358d8dfb042c7b9d5f0e61c3a76988b9dbcc671caf4d339",
+    "matchesAuditSnapshot": true
+  },
+  {
+    "file": "Webcast/Cast/CastManager.swift",
+    "sha256": "dbfcaf7eaae970095a4e7454bd3c1397b80ad0b9733bd3106d49f56e49930db6",
+    "matchesAuditSnapshot": true
+  },
+  {
+    "file": "Webcast/Cast/MediaLoader.swift",
+    "sha256": "716404cc78444fed2eb285c5f70881f47b0993c9fb22fd6ad5b866e78d84c048",
+    "matchesAuditSnapshot": true
+  },
+  {
+    "file": "Webcast/Cast/NowPlaying.swift",
+    "sha256": "2106e7fb11395af42fcc371c0465307bc99a71e34155cf80c05b976d70adc02a",
+    "matchesAuditSnapshot": true
+  },
+  {
+    "file": "Webcast/Models/BrowserAddress.swift",
+    "sha256": "6a2120cd7e63b4c8f18f9295efaeff68078dea7cdba9a1761a73aadc65f4adf3",
+    "matchesAuditSnapshot": true
+  },
+  {
+    "file": "Webcast/Models/CastLoadState.swift",
+    "sha256": "ac6627d3cb834eeab025510807a738b449ba8b416922193f215622553dcf9fbc",
+    "matchesAuditSnapshot": true
+  },
+  {
+    "file": "Webcast/Models/VideoCandidate.swift",
+    "sha256": "6c3e57b547b6a0b19c74d81c72c68c8e1d5adf1f5151c62d610f7eb9ab3413b3",
+    "matchesAuditSnapshot": true
+  },
+  {
+    "file": "Webcast/Sniffer/VideoSniffer.swift",
+    "sha256": "7fb5b9e311745dedfd3975017bcd2bcef6d9205467e3b72294c94db4975c1b97",
+    "matchesAuditSnapshot": true
+  },
+  {
+    "file": "Webcast/Views/BrowserView.swift",
+    "sha256": "d51c7a76a57749243685f71e72b7cab14dc42883694eaf45b49a611185a608f8",
+    "matchesAuditSnapshot": true
+  },
+  {
+    "file": "Webcast/Views/CastErrorAlert.swift",
+    "sha256": "a983f174bed60447499385d0c08946817f8100e18492df1ee0091c5c7fd17fb8",
+    "matchesAuditSnapshot": true
+  },
+  {
+    "file": "Webcast/Views/ContentView.swift",
+    "sha256": "9a8919e74c7c92e1e8b6720a7106f5caff6fd49f624af4b95573624c869e345d",
+    "matchesAuditSnapshot": true
+  },
+  {
+    "file": "Webcast/Views/DevicePicker.swift",
+    "sha256": "65fcfb52bc891f868b80833032be09579d65d6d7fda31cb9aa148c1b136b7a64",
+    "matchesAuditSnapshot": true
+  },
+  {
+    "file": "Webcast/Views/RemoteView.swift",
+    "sha256": "1865854d67c3be66859ddab2716e35d9cfa959d7af010d52ba126c5e59f328c9",
+    "matchesAuditSnapshot": true
+  },
+  {
+    "file": "Webcast/Views/SettingsView.swift",
+    "sha256": "f4423b2f892f6e7423151bb14cdf934320c3484f4285731a213d312f36fe02e1",
+    "matchesAuditSnapshot": true
+  },
+  {
+    "file": "Webcast/Views/SniffSheet.swift",
+    "sha256": "68df1a65d78c401712c166e56b57fb191cefaeb3e344346ee08e43d493ef8996",
+    "matchesAuditSnapshot": true
+  },
+  {
+    "file": "Webcast/WebcastApp.swift",
+    "sha256": "7e28564530f7508c15148f914f0f14aa424d8934af1f271d725f5f119a79bb0a",
+    "matchesAuditSnapshot": true
+  },
+  {
+    "file": "Webcast/Sniffer/sniff.js",
+    "sha256": "74e6aed0b4945cd6c7f2e7e4517d8078f220885b027fb62151eaa201391c297d",
+    "matchesAuditSnapshot": true
+  },
+  {
+    "file": "Webcast/Localizable.xcstrings",
+    "sha256": "48c4a7984c059afe5543a82bd65832b037b4efe3ef8ef60aed4f2cf7240e2b9e",
+    "matchesAuditSnapshot": true
+  },
+  {
+    "file": "project.yml",
+    "sha256": "7e193530e88d4aba8df36113f5fb0ffbf6de688a8af33431624ea46853aeb7a4",
+    "matchesAuditSnapshot": true
+  },
+  {
+    "file": "Makefile",
+    "sha256": "9e6e8fcb9d501c64fe6414a57d178533def808f718b460a6eab48af4616bd2c5",
+    "matchesAuditSnapshot": true
+  },
+  {
+    "file": "Package.resolved",
+    "sha256": "62fd125b08f8ca475be2b98c2ea665d3a4347e4059a3f6f063bdb75b9d5a4a45",
+    "matchesAuditSnapshot": true
+  }
+]

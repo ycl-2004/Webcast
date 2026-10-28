@@ -1,0 +1,13 @@
+{
+  "fixture": "Play A, play B, play A again with unchanged metadata",
+  "expected": [
+    "https://cdn.example/first.mp4",
+    "https://cdn.example/second.mp4",
+    "https://cdn.example/first.mp4"
+  ],
+  "observed": [
+    "https://cdn.example/first.mp4",
+    "https://cdn.example/second.mp4"
+  ],
+  "reproduced": true
+}

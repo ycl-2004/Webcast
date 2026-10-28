@@ -1,0 +1,3 @@
+Candidate bound: inserted=150, retained=100, intendedLimit=100
+Ranking: first=current-episode.mp4, current=true
+Multi-frame current: frame one still uses shared.mp4, markedCurrent=true

@@ -1,0 +1,28 @@
+{
+  "changedFromTaskBaseline": [
+    "Webcast/Localizable.xcstrings",
+    "Webcast/Info.plist",
+    "Webcast/Sniffer/sniff.js",
+    "Webcast/Sniffer/VideoSniffer.swift",
+    "Webcast/Cast/CastManager.swift",
+    "Webcast/Models/VideoCandidate.swift",
+    "Webcast/Browser/BrowserModel.swift",
+    "Webcast/Views/RemoteView.swift",
+    "Webcast/Views/DevicePicker.swift",
+    "Webcast/Views/ContentView.swift",
+    "Tests/Swift/BrowserRegressionTests.swift",
+    "project.yml",
+    "README.md",
+    "README.zh-TW.md",
+    "docs/ACCEPTANCE.md",
+    ".fable/task.md",
+    ".fable/history.md"
+  ],
+  "newSourceTestScriptFiles": [
+    "Tests/Receiver/CastReceiverAcceptanceTests.swift",
+    "Tests/Swift/SnifferSecurityTests.swift",
+    "Webcast/Models/CastConnectionWait.swift",
+    "Webcast/Sniffer/SnifferPayload.swift",
+    "scripts/run_receiver_acceptance.py"
+  ]
+}

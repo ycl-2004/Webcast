@@ -12,7 +12,7 @@
   <img src="https://img.shields.io/badge/status-source%20build-111111" alt="Source build; no public binary release">
   <img src="https://github.com/ycl-2004/Webcast/actions/workflows/ci.yml/badge.svg" alt="CI unit tests">
   <img src="https://img.shields.io/badge/iOS-16.0%2B-111111?logo=apple&amp;logoColor=white" alt="iOS 16.0 or later">
-  <img src="https://img.shields.io/badge/version-0.1.1%20%282%29-111111" alt="Current build 0.1.1 (2)">
+  <img src="https://img.shields.io/badge/version-0.1.2%20%284%29-111111" alt="Current source build 0.1.2 (4)">
   <img src="https://img.shields.io/badge/SwiftUI-WKWebView-F05138?logo=swift&amp;logoColor=white" alt="Built with SwiftUI and WKWebView">
   <img src="https://img.shields.io/badge/Google%20Cast-4.8.6-111111" alt="Google Cast SDK 4.8.6">
 </p>
@@ -28,7 +28,7 @@
 
 Webcast is a native iOS browser and Chromecast remote for watching web videos on a larger screen. Open a website, play a video, and choose a detected stream to send to the TV. The TV fetches the stream directly; the phone handles browsing and playback controls.
 
-> **Current distribution:** source build only, with no App Store, TestFlight, or downloadable binary release. Release **0.1.1 (2)** with the new watercolor icon was built, signed with an Apple Development / Personal Team account, and installed on an iPhone 15 on **2026-10-07**. The user reported successful TV playback. Individual controls, lock-screen behavior, and Wi-Fi recovery still need acceptance testing. [Validation record](artifacts/validation.md).
+> **Current distribution:** source build only; there is no App Store, TestFlight, or downloadable binary release. A locally signed Release **0.1.2 (4)** was installed and launch-verified on an iPhone 15. Core Chromecast playback and controls passed on that phone; browser UI, lock-screen behavior, and Wi-Fi recovery remain unaccepted. [Acceptance checklist](docs/ACCEPTANCE.md).
 
 ## Quick start
 
@@ -48,7 +48,7 @@ If a stream fails, replay the video in the browser and select a fresh candidate.
 - Chromecast or a Google Cast-enabled receiver, connected to the same Wi-Fi.
 - Local Network permission for device discovery and casting.
 - Internet access for web pages and remote video sources.
-- The current interface uses Simplified Chinese. An iPad target is configured, but physical iPad acceptance has not been recorded.
+- The app includes English, Simplified Chinese, and Traditional Chinese localization; manual language acceptance remains pending. An iPad target is configured, but physical iPad acceptance has not been recorded.
 
 ## Why Webcast
 
@@ -70,10 +70,14 @@ If a stream fails, replay the video in the browser and select a fresh candidate.
 - Identify HLS and MP4 candidates; display current-video status, source, duration, and live information when available.
 - Preserve signed URL parameters, remove duplicate candidates, and disable candidates identified as DRM-protected.
 - Label inferred MSE candidates separately; **`可能是正片`** is an estimate, so check the source and duration.
+- Put current media first, then prefer master playlists. Unknown duration is kept distinct from live playback.
+- The native detection bridge runs in an isolated WebKit world. Page-provided observations have typed, bounded fields and message budgets; detected media still requires explicit user selection.
 
 **Chromecast remote**
 
-- Discover receivers and select a TV.
+- Discover receivers and select a TV; once a TV has been used, **`投到 <TV>`** connects and casts in one tap whenever it is online.
+- The phone's volume buttons control TV volume while the app is open; discovery stays on in the foreground so the Cast SDK can resume a session after unlocking or reopening the app (not yet verified on a TV).
+- The Cast session suspends in the background and clears system media controls. Sustained lock-screen control is not supported; return to the app to resume. The TV fetches its stream independently, but actual playback continuity and reconnection still require receiver acceptance.
 - Play/pause, seek, jump 15 seconds, change volume, mute, stop, and disconnect.
 - Show connection and playback status, including loading and interrupted sessions. These controls are implemented; complete physical-device acceptance is still pending.
 
@@ -83,7 +87,7 @@ If a stream fails, replay the video in the browser and select a fresh candidate.
 
 Webcast sends the chosen URL and media metadata to Google's Default Media Receiver. It does not mirror the phone's screen or proxy the video through the phone.
 
-**`断开连接`** disconnects the phone without requesting a playback stop. **`停止并断开`** requests that the TV stop and then disconnects. The two actions are kept separate.
+**`停止并断开`** asks for confirmation, then requests that the TV stop and disconnects the phone. A disconnect that keeps the TV playing is not offered: with only one sender connected, the Cast SDK stops playback even when its stop flag is false. [Google Cast API behavior](https://developers.google.com/cast/docs/reference/ios/interface_g_c_k_session_manager).
 
 ## Screenshots
 
@@ -101,19 +105,30 @@ These checked-in captures came from an earlier simulator build on 2026-10-07. Th
 - Webcast has no app account or project-operated backend. Settings, the last visited URL, and the last selected tab are stored locally.
 - WebKit stores website cookies, cache, and other website data on the device. **`设置 → 清除网站数据`** clears that data and the saved last URL; websites then require login again.
 - Opening pages and searching contacts the chosen website or search engine. Casting sends the selected media URL, title, and source host to the receiver, which fetches the media from its origin.
+- **Settings → Cast diagnostics** keeps the latest 20 failures in memory for the current process: stage, numeric code, timestamp, build, receiver model and source hostname. It excludes full media URLs, cookies and page content, is never uploaded, and can be cleared manually. Ending the app process clears it.
 - Google Cast SDK analytics logging is disabled in the app configuration. Release builds also disable detailed SDK debug logging.
+- The app bundles its own privacy manifest for local UserDefaults preferences; Google Cast keeps its own SDK manifest.
 - Websites, search providers, media hosts, and Google Cast components have their own network and data behavior. Webcast is not an offline app and does not make their traffic private.
 
 ## Current build
 
-**0.1.1 (2)** is the current version in [`project.yml`](project.yml). It includes the browser, video detection, Chromecast remote, settings, and watercolor app icon.
+**0.1.2 (4)** is the current source version in [`project.yml`](project.yml). It isolates the native detection bridge, validates and budgets media messages, and bounds foreground connection waiting. The current `CastManager` passed public-HLS playback and controls against a physical Chromecast with an iOS simulator sender. The signed Release is installed and launch-verified on iPhone 15; the physical iPhone 15 (iOS 26.5) → Chromecast core playback/control test passed. Signing expires on 2026-11-02. [Installation receipt](artifacts/iphone-2026-10-26.json). See the [hardening and verification record](artifacts/hardening-2026-10-26.md) and [acceptance checklist](docs/ACCEPTANCE.md).
 
 | Evidence | Result |
 | --- | --- |
-| Signed iPhone Release build | Built and signature-verified; installed on iPhone 15 |
-| Automated validation | 20 passed, 0 failed, 0 skipped; recorded before the icon-only change |
-| Actual TV playback | User-reported success; source and individual control results were not recorded |
+| Historical signed iPhone Release build | 0.1.1 (2), installed on iPhone 15 on 2026-10-07 |
+| Current offline regression and Release evidence | See the [build 4 record](artifacts/hardening-2026-10-26.md) for exact runtime counts and bundle results |
+| Current CastManager → physical Chromecast | HLS playback confirmation, advancing position, pause, seek, resume, mute/unmute, stop, volume restoration and disconnect passed; passed with both an iOS 26.5 simulator and physical iPhone 15 |
+| Physical iPhone | Core SDK playback/control passed; [phone evidence](artifacts/iphone-receiver-2026-10-26.json). Signed Release restored and launched afterward |
+| Lock-screen / Wi-Fi recovery / soak / full UI | Pending; protocol status is not visual/audio or full UI acceptance |
+| Previous source tests (build 3) | 78 passed on each of iOS 18.6 and 26.5; [previous fix record](artifacts/fixes-2026-10-24.md) |
 | Public distribution | No published binary, App Store, or TestFlight release |
+
+Source fixes from 2026-10-18 are tracked separately in the [F1–F6 fix record](artifacts/fixes-2026-10-18.md). Those historical builds were not installed on the phone or individually accepted on a receiver; the build 4 core receiver result is recorded above.
+
+Further foundation improvements are recorded in the [local quality review](artifacts/foundation-2026-10-18.md): the browser loads a page only when visited, and local media pauses only after matching receiver playback is confirmed. Local tests and component renders do not replace receiver acceptance.
+
+Sustained-browsing limits, navigation regressions, Cast quality metadata checks, and public UI cleanup are tracked in the [stability review](artifacts/stability-2026-10-18.md).
 
 See the [validation record](artifacts/validation.md), [implementation review](artifacts/review-2026-10-07.md), and [receiver acceptance checklist](docs/FEASIBILITY.md). The icon update did not change app behavior; tests were not rerun for that asset-only update.
 
@@ -140,12 +155,14 @@ Personal Team provisioning profiles expire after seven days. Rebuild and reinsta
 
 </details>
 
+Manual receiver QA is separate from normal offline tests. Run `python3 scripts/run_receiver_acceptance.py --help` for the explicit receiver/destination options. It requires `--allow-control`, uses public HLS at low volume, stops playback and restores volume afterward. It does not update Apple signing resources. See [the decision](docs/decisions/003-isolated-detection-and-receiver-qa.md).
+
 ## Build from source
 
 <details>
 <summary>Requirements, local signing, build, and validation commands</summary>
 
-Use a Mac with Xcode and the iOS SDK, plus XcodeGen on your `PATH`. This project has been built with Xcode 27.0. Google Cast is pinned to `SRGSSR/google-cast-sdk` **4.8.6**; the first build needs network access for dependencies.
+Use a Mac with Xcode and the iOS SDK, plus XcodeGen on your `PATH`. Local validation uses Xcode **27.1**. CI explicitly selects Xcode **26.3** and an iOS **18.6** simulator; CI execution must still be checked after pushing. Google Cast uses the official **4.8.6** dynamic archive, pinned by URL and checksum in [`Packages/GoogleCast/Package.swift`](Packages/GoogleCast/Package.swift). This binary-only SPM manifest avoids duplicate classes observed with the upstream wrapper ([decision](docs/decisions/002-media-origin-and-official-sdk.md)); the first build needs network access for dependencies.
 
 ```sh
 git clone https://github.com/ycl-2004/Webcast.git
@@ -172,17 +189,24 @@ Both files are ignored by Git. Replace the placeholders with your own values. Re
 
 ```sh
 make build           # Unsigned simulator Release
+make check-release   # Build Release and verify packaged resources/privacy/debug isolation (Python 3)
 make release         # Unsigned physical-device Release; does not install
 make device-build    # Signed physical-device Release; does not install
 make device-install  # Build and install; does not launch the app
 make device          # Build, install, and launch the app
 ```
 
-Run tests using an installed iPhone simulator:
+List installed simulators, then run tests using the chosen UUID:
 
 ```sh
-make test SIMULATOR='iPhone 16 Pro'
+xcrun simctl list devices available
+make test SIMULATOR_ID='<SIMULATOR_UUID>'
+
+# Alternatively, choose a device name and its installed iOS version:
+make test SIMULATOR='iPhone 16 Pro' SIMULATOR_OS=18.6
 ```
+
+`SIMULATOR_ID` takes priority over name and OS. Without a UUID, the defaults are `iPhone 17` and `latest`; when multiple runtimes are installed, specify the version matching the device name.
 
 To open the bundled HLS demo, first boot a simulator and use its UUID:
 

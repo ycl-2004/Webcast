@@ -1,0 +1,13 @@
+{
+  "sourceLanguage" : "zh-Hans",
+  "strings" : {
+    "NSLocalNetworkUsageDescription" : {
+      "localizations" : {
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "连接同一 Wi-Fi 下的 Chromecast，将你选择的视频投到电视。" } },
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Connect to a Chromecast on the same Wi-Fi to play your selected video on the TV." } },
+        "zh-Hant" : { "stringUnit" : { "state" : "translated", "value" : "連接同一個 Wi-Fi 下的 Chromecast，將你選擇的影片投放到電視。" } }
+      }
+    }
+  },
+  "version" : "1.0"
+}

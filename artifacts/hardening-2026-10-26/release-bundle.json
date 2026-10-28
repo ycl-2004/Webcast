@@ -1,0 +1,12 @@
+{
+  "bundle": "dev.yc.Webcast",
+  "configuration": "Release",
+  "result": "Passed",
+  "version": "0.1.2",
+  "build": "4",
+  "noDuplicateObjCClasses": true,
+  "uiAndPermissionLocalizations": true,
+  "appPrivacyManifest": true,
+  "castPrivacyManifest": true,
+  "snifferScript": true
+}

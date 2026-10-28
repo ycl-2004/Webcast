@@ -2,6 +2,7 @@ import SwiftUI
 
 struct RemoteView: View {
     @EnvironmentObject private var cast: CastManager
+    @Environment(\.dynamicTypeSize) private var dynamicTypeSize
     let selectDevice: () -> Void
     let loadVideo: (VideoCandidate) -> Void
     @State private var seekValue = 0.0
@@ -36,15 +37,22 @@ struct RemoteView: View {
         }
         .navigationTitle("投屏遥控").navigationBarTitleDisplayMode(.inline)
         .onAppear { seekValue = cast.position; volumeValue = cast.volume }
-        .onDisappear { volumeSendTask?.cancel(); volumeSendTask = nil }
+        .onDisappear {
+            volumeSendTask?.cancel(); volumeSendTask = nil
+            editingVolume = false; editingSeek = false
+        }
         .onChange(of: cast.position) { if !editingSeek { seekValue = min($0, max(cast.duration, 1)) } }
         .onChange(of: cast.volume) { if !editingVolume { volumeValue = $0 } }
         .onChange(of: cast.connection) { state in
             // 恢复/重连后同步本地滑条，避免用旧值发送指令
             if state == .connected { seekValue = cast.position; volumeValue = cast.volume }
+            else {
+                volumeSendTask?.cancel(); volumeSendTask = nil
+                editingVolume = false; editingSeek = false
+            }
         }
         .confirmationDialog("停止电视播放并断开连接？", isPresented: $confirmStop, titleVisibility: .visible) {
-            Button("停止并断开", role: .destructive) { cast.disconnect(stopPlayback: true) }
+            Button("停止并断开", role: .destructive) { cast.disconnect() }
         }
     }
 
@@ -53,11 +61,9 @@ struct RemoteView: View {
     private var connectHero: some View {
         VStack(alignment: .leading, spacing: 12) {
             statusEyebrow
-            Text("把网页视频放到大屏上")
+            Text("连接电视")
                 .font(.title2.weight(.semibold))
                 .fixedSize(horizontal: false, vertical: true)
-            Text("手机和电视连接同一 Wi-Fi，然后选择电视。")
-                .foregroundStyle(.secondary)
             Button(action: selectDevice) {
                 Label("选择电视", systemImage: "tv").frame(minWidth: 132)
             }
@@ -70,8 +76,8 @@ struct RemoteView: View {
                 Button("找不到电视？") { withAnimation(.easeInOut(duration: 0.2)) { showHelp.toggle() } }
                     .font(.subheadline)
             }
-            if cast.connection == .suspended {
-                Button("断开并重试", role: .destructive) { confirmStop = true }
+            if cast.connection == .suspended || cast.connection == .connecting {
+                Button("停止并断开", role: .destructive) { confirmStop = true }
                     .buttonStyle(.bordered)
                     .padding(.top, 6)
             }
@@ -79,12 +85,17 @@ struct RemoteView: View {
                 Text("确认电视已开机，手机和电视连接同一个 Wi-Fi，并在系统设置里允许 Webcast 访问本地网络，然后重新选择电视。")
                     .font(.callout)
                     .foregroundStyle(.secondary)
+                Link("打开系统设置", destination: URL(string: UIApplication.openSettingsURLString)!)
             }
         }
     }
 
     @ViewBuilder
     private var statusEyebrow: some View {
+        if cast.connectionWaitExpired {
+            Label("连接等待超时", systemImage:"wifi.exclamationmark")
+                .font(.subheadline.weight(.medium)).foregroundStyle(.secondary)
+        } else {
         switch cast.connection {
         case .connecting:
             Label("正在连接电视…", systemImage: "tv")
@@ -99,6 +110,7 @@ struct RemoteView: View {
                 .font(.subheadline.weight(.medium))
                 .foregroundStyle(.secondary)
         }
+        }
     }
 
     // MARK: - 已连接：完整遥控器
@@ -106,7 +118,7 @@ struct RemoteView: View {
     private var connectedRemote: some View {
         VStack(alignment: .leading, spacing: 24) {
             VStack(alignment: .leading, spacing: 8) {
-                Label(cast.deviceName.isEmpty ? "已连接电视" : cast.deviceName, systemImage: "tv.fill")
+                Label(cast.deviceName.isEmpty ? String(localized: "已连接电视") : cast.deviceName, systemImage: "tv.fill")
                     .font(.subheadline.weight(.medium))
                     .foregroundStyle(.teal)
                 if cast.hasMedia {
@@ -115,7 +127,7 @@ struct RemoteView: View {
                         .fixedSize(horizontal: false, vertical: true)
                 }
                 if cast.isLoading {
-                    Text("正在请求电视加载视频…").foregroundStyle(.secondary)
+                    Text("正在加载视频…").foregroundStyle(.secondary)
                 } else if cast.hasMedia {
                     Text(cast.playbackLabel).foregroundStyle(.secondary)
                 } else {
@@ -138,12 +150,12 @@ struct RemoteView: View {
                 editingSeek = editing
                 if !editing { cast.seek(to: seekValue) }
             })
-            .disabled(cast.duration <= 0)
+            .disabled(cast.duration <= 0 || cast.isLoading)
             .accessibilityLabel("播放进度")
             HStack {
                 Text(timeLabel(editingSeek ? seekValue : cast.position))
                 Spacer()
-                Text(cast.duration > 0 ? timeLabel(cast.duration) : "直播")
+                Text(cast.duration > 0 ? timeLabel(cast.duration) : (cast.isLive ? String(localized: "直播") : "--:--"))
             }.font(.caption.monospacedDigit()).foregroundStyle(.secondary)
             HStack(spacing: 32) {
                 Button {
@@ -161,7 +173,7 @@ struct RemoteView: View {
                         .background(Color.teal.opacity(0.12))
                         .clipShape(Circle())
                 }
-                .accessibilityLabel(cast.isPlaying ? "暂停" : "播放")
+                .accessibilityLabel(cast.isPlaying ? String(localized: "暂停") : String(localized: "播放"))
                 Button {
                     cast.seek(to: cast.position + 15)
                 } label: {
@@ -183,7 +195,7 @@ struct RemoteView: View {
             }
             HStack {
                 Button(action: cast.toggleMute) { Image(systemName: cast.isMuted ? "speaker.slash.fill" : "speaker.wave.2.fill").frame(width: 44, height: 44) }
-                    .accessibilityLabel(cast.isMuted ? "取消静音" : "静音")
+                    .accessibilityLabel(cast.isMuted ? String(localized: "取消静音") : String(localized: "静音"))
                 Slider(value: $volumeValue, in: 0...1, onEditingChanged: { editing in
                     editingVolume = editing
                     if editing {
@@ -210,13 +222,14 @@ struct RemoteView: View {
     }
 
     private var stopControls: some View {
-        HStack(spacing: 12) {
+        let layout = dynamicTypeSize.isAccessibilitySize ? AnyLayout(VStackLayout(alignment: .leading, spacing: 12))
+            : AnyLayout(HStackLayout(spacing: 12))
+        return layout {
             Button("停止播放", role: .destructive, action: cast.stop)
                 .buttonStyle(.borderedProminent)
                 .disabled(!cast.hasMedia || cast.isLoading)
-            Button("断开连接", role: .destructive) { confirmStop = true }
+            Button("停止并断开", role: .destructive) { confirmStop = true }
                 .buttonStyle(.bordered)
-                .disabled(cast.isLoading)
         }
         .padding(.top, 4)
     }

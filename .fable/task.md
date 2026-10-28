@@ -1,66 +1,65 @@
-# Webcast implementation
+# Input hardening and authorized Chromecast acceptance — 2026-10-26
 
-## Goal
-Implement the iPhone browser → video detection → Chromecast → remote MVP from PLAN.md, with observable validation and honest device acceptance status.
+## Intent
+Implement the review's first security/stability changes, verify regressions, and attempt authorized real Chromecast playback/control against current working-tree code.
 
-README/publication follow-up complete: the YC-style English and Traditional Chinese READMEs, app icon and validation records were committed and pushed to the user-specified repository, preserving existing history. Remaining receiver acceptance is listed below and is separate from this completed publication task.
-
-## Acceptance criteria and append-only requirements
-1. Follow PLAN.md: iOS 16+, SwiftUI, Chinese, Google Cast 4.8.6, Default Media Receiver, XcodeGen.
-2. Investigate iyf playback feasibility before deciding whether a proxy belongs in the MVP.
-3. Implement real browser, native and MSE detection across frames, deduplication/ranking, Cast session/load/control and errors.
-4. Build and run the software; provide reproducible setup and validation evidence. Do not equate simulation with TV playback.
-5. Added 2026-10-07: Do not connect to Chromecast or send any playback/control commands during agent work. Physical acceptance is deferred.
-6. Added 2026-10-07: Scan only for Dining Room TV. Complete: Chrome's Cast device picker displayed “Dining room TV — Available”; no device was selected.
-7. Added 2026-10-07: Review the latest uncommitted changes for regressions and long-term stability; fix confirmed issues and run appropriate checks.
-8. Added 2026-10-07: Use the correct Chinese site name “爱壹帆”.
-9. Added 2026-10-07: Investigate the interrupted pi agent run and identify leftover processes without accessing Claude CLI or unrelated sessions.
-10. Added 2026-10-07: Delete confirmed project temporary files and stop obsolete task processes; preserve source, session history, and current tool services.
-11. Added 2026-10-07: Make Release the normal build/run configuration, verify production compilation, and exclude debug-only behavior.
-12. Added 2026-10-07: Keep app wording focused on browsing, finding a video, casting, and controlling playback; retain only actionable explanations.
-13. Added 2026-10-07: Preserve the no-TV-command requirement. Report the actual signing/install status separately from production compilation, without treating an unsigned build as an installed app.
-14. Added 2026-10-07: The user authorized using the existing yichen.lin.2004@gmail.com Xcode account, inspecting/editing its project signing settings, and replacing the iPhone app with the signed Release build. Do not launch it or connect to the TV.
-
-15. Added 2026-10-07: Record the user's successful television playback report without expanding it to untested source/control/recovery scenarios.
-16. Added 2026-10-07: Read relevant logs/status from the connected phone without restarting the App or controlling the television.
-17. Added 2026-10-07: Commit and push the reviewed current state; preserve local credentials, signing/device settings and binaries outside Git. Push destination must be resolved because no remote is configured.
-18. Added 2026-10-07: Generate a phone-ready Webcast app icon matching the user's FoldPeek, Wisp, NoType and Orbit visual family, and wire it into the project.
-19. Added 2026-10-07: Update the connected phone with the newly generated app icon; retain the no-launch/no-TV-command boundary.
-20. Added 2026-10-07: Apply yc-readme, complete the README, and commit/push to https://github.com/ycl-2004/Webcast.git on main. Preserve existing commits and keep credentials, local signing/device settings and binary build products outside Git.
+## Append-only requirements
+- R1 Preserve all existing changes and implement bounded, typed native media/bridge input validation.
+- R2 Restrict forged restoration and cross-origin frame bookkeeping; retain explicit user casting and document any page-world trust limits.
+- R3 Add native message budgets/coalesced publication and targeted security/lifecycle regressions.
+- R4 Add bounded connection/recovery waiting with cancellation and truthful states, preserving SDK reconnection.
+- R5 Discover the home Chromecast, attempt actual connection and safe public-media playback/control; distinguish receiver-only, simulator, and physical iPhone evidence.
+- R6 Run relevant/full tests and Release validation; update usage/decision/acceptance docs and report untested hardware limits.
+- R7 User approved installation in direct response to the explicit provisioning/signing/install request; use the existing team to sign/install build 4 on the newly connected iPhone, then attempt physical receiver acceptance.
+- R8 User reports the trusted app now opens and authorizes relevant real computer/device operations for testing; run physical iPhone-to-Cast acceptance and restore the signed Release afterward.
 
 ## Decisions
-- No existing source or Git repository; PLAN.md is the approved spec.
-- Source-pinned dependency confirmed: SRGSSR/google-cast-sdk tag 4.8.6 (GoogleCast product, iOS 16 minimum).
-- Step 0 is unresolved: desktop Chrome plays 仙逆-01 through blob/MSE; observed chunklist URL returns Cloudflare HTTP 403 to independent curl. This does not prove Referer rejection, DRM, or proxy necessity.
-- Proceed with independent sender/browser work. No speculative local proxy or background-audio workaround. iyf production acceptance remains open.
-- Validation uses an explicit offline launch environment that does not initialize the Cast SDK, preventing automatic reconnection as well as deliberate connection.
+- Work in place because current uncommitted working tree is the requested baseline; backup: /tmp/webcast-before-hardening-2026-10-26. No commits/pushes.
+- User explicitly authorized connecting/testing Chromecast in this request. Use public test streams, inspect existing playback before taking over, restore volume/mute and stop own test media.
+- Do not run superpowers workflows, per user instruction; existing reviewed design authorizes direct implementation.
+- Detected one Cast receiver and paired iPhone 15. Discovery is not playback evidence.
 
 ## Evidence
-- Publication follow-up (requirements 17 and 20): commit db0937150aa1d38fe29dda32f5907ffba3f67a87 (user-requested message: first commit) was pushed to origin/main at https://github.com/ycl-2004/Webcast.git. Remote main matched local HEAD; the worktree was clean and main tracked origin/main. GitHub contents API returned both READMEs with blob SHAs matching local Git. Existing commits ff47504 and 98c1874 were preserved. Local signing/device settings, credentials and binary build products remain ignored. This record is committed separately after verification.
-- README follow-up (requirement 20): completed English README.md and Traditional Chinese README.zh-TW.md from current source/configuration and existing validation evidence. Checked 32 local links/images/anchors; verified version, dependency, platform and all eight documented Make targets; validated GitHub HTML formatting and navigation targets; five badge URLs returned HTTP 200. Apple Personal Team expiration was checked against Apple's current account overview. JS syntax, Info.plist, icon JSON, diff whitespace and credential-pattern checks passed. No app behavior changed, so the recorded 20/20 tests and this session's signed Release build/install evidence were reused.
-- 2026-10-07: Xcode 27.0 and XcodeGen available. XcodeBuildMCP lists iOS 18.6 and 26.5 simulators.
-- Browser page https://www.iyf.tv/play/qXvszbfSdq5: title 仙逆-01; video currentSrc is blob. Observed playlist host sss8-e1.pipecdn.vip; signed query is intentionally not committed.
-- curl response: HTTP 403, Server cloudflare, HTML response; /private/tmp/webcast-iyf-headers.txt (temporary local evidence).
-- Simulator build and launch succeeded with Google Cast 4.8.6. Final Swift source produced no compiler warnings in the XcodeBuildMCP build/test output.
-- Earlier baseline tests: 14 passed, 0 failed, 0 skipped, iPhone 16 Pro / iOS 18.6. Includes real WKWebView opaque-origin iframe, fetch and XHR, and SDK optional selector checks. The latter caught and corrected a silently missing session-resume callback.
-- Native Device Hub UI: demo HLS candidate shown, Cast action disabled in offline mode. artifacts/sniffer-demo.jpg.
-- Native Device Hub UI: real iyf 仙逆-01 plays in App; current chunklist.m3u8 (25:42) appears separately from an MP4. artifacts/iyf-sniffer.jpg.
-- Earlier device builds hit sandbox/cache/macro restrictions; resolved using scoped build access. Obsolete raw logs were summarized and removed in the follow-up cleanup.
+Baseline file hashes: artifacts/hardening-2026-10-26/baseline.json.
 
-- 2026-10-07 follow-up: 20 tests passed / 0 failed / 0 skipped after address, settings, all-type data removal, dialog and crash-recovery fixes; no Swift warnings.
-- Signed Release 0.1.1 (2), dev.yc.Webcast: build and strict signature verification passed; no debug dylib/test bundle/offline-demo markers. devicectl confirmed installation on iPhone 15; app was not launched.
-- Existing Xcode Personal Team is BQYHJCCRMP; the previous 5AGX9CFNPL value was the certificate identity suffix. Signing is preserved in ignored local xcconfig; profile expires 2026-10-14 14:28:29 UTC.
-- pi transcript ends with stopReason=aborted / Operation aborted, without evidence identifying the abort trigger. All seven registered tasks ended; four failures were masked by shell exit handling. Terminal-owned caffeinate and an obsolete simulator app were stopped, followed by the old device Debug session.
-- Follow-up evidence and cleanup inventory: artifacts/review-2026-10-07.md. Existing source/screenshots and global pi session history retained.
+## Evidence / work log
+- Isolated bridge now uses WKContentWorld.defaultClient; page-world collector forwards only validated observations. Native typed/byte limits, separate control/media budgets, bounded deferred latest observations and coalesced publication are implemented.
+- Added 30-second foreground connection/recovery wait and cancellation of pending media on timeout. Build identity is now 0.1.2 (4).
+- Added seven offline security tests and a separate opt-in receiver suite, excluded from ordinary Webcast/CI tests.
+- Mac Python receiver protocol test passed HLS playback, advancing position, pause, seek, resume, volume, mute/unmute and stop; original volume/mute restored. First Google MP4 URL returned HTTP 403 and was not counted as a successful playback.
+- Security fixture initially mutated the controller script collection during enumeration; caused crash/resource growth. Stopped those task-owned processes, retained failure logs, replaced fixture with setup + fixed source. Seven tests subsequently passed on iOS 18.6.
+- Full regression found cache-commit replay ordering, detached preload and block-scoped scan/announce regressions after isolation. Corrected native post-commit handshake, lightweight page source hooks and global helper scope; targeted verification ongoing.
+- Receiver runner initially needed explicit Products paths and legacy xctestrun format support. First actual native discovery check used the wrong SDK ID; corrected to deviceID per official headers/docs.
+- Physical iPhone build failed due missing provisioning profile. Auto-review rejected -allowProvisioningUpdates because developer-account signing resource changes need explicit user approval. No retry/bypass; script does not enable provisioning updates. Simulator and receiver-only verification continue.
 
-- 2026-10-07 user follow-up: television playback succeeded according to the user's test. No specific video/receiver/control matrix supplied; do not equate this with full source/recovery acceptance.
-- Read-only connected-phone checks: app 0.1.1 (2); no Webcast process at inspection time; Webcast-filtered crash report query returned 0 files; no Library/Logs directory. Release has no persistent detailed GCK logs. No App launch or TV command by agent.
-- Follow-up changes are documentation only; reused the unchanged 20/20 code test result and repeated scoped static/package/diff checks before saving.
+## Final verification
+- R1–R3: typed/byte-limited input, isolated native bridge, known generation restore, route-safe observations, budgets/coalescing and immediate selection context implemented. Eight added offline tests; all existing correctness assertions retained.
+- R4: 30-second foreground connection/recovery deadline, error/cancellation and background timer suspension implemented/localized.
+- R5: Python receiver HLS protocol test passed; final source's iOS CastManager passed the same real Chromecast using an iOS 26.5 simulator sender. Final read-only state: standby, original volume/mute restored. Phone build attempt failed for missing profile; auto provisioning update rejected, no bypass/installation.
+- R6: final full suites each 86/86 passed on iOS 18.6 and 26.5; simulator and arm64 unsigned Release builds/bundle checks passed. Both bundle scripts match final source. Final locale-format restoration preserved JSON semantics and freshly compiled locale data matches verified Release resources. Report links, JS/plist syntax, diff whitespace and final source hash checks passed.
+- Final receiver retest: artifacts/hardening-2026-10-26/receiver-final.json and receiver-final-summary.json. Test/source snapshot and relative-baseline patch retained.
+- Raw logs/xcresult and generated bytecode moved to git-ignored artifacts/private/hardening-2026-10-26; task-owned discovery processes stopped; temporary authorized xctestrun removed.
 
-## Outstanding
-- Phone icon update (requirement 19) complete: signed Release build and strict signature verification passed; the compiled icon was visually confirmed; devicectl installed the updated package on iPhone 15 successfully and exact-bundle query confirmed 0.1.1 (2). No App launch or TV command was performed. Current local package: .build-device/Build/Products/Release-iphoneos/Webcast.app. The home screen was not visually inspected.
-- App icon follow-up (requirement 18) complete: inspected all four local reference icons; generated a cream-paper watercolor TV/play/casting icon with the built-in image tool; integrated the opaque 1024 × 1024 PNG into AppIcon. Xcode asset compilation passed (exit 0), 60 px preview inspected, original icon preserved byte-for-byte, and diff hygiene passed. Prompt and evidence: artwork/appicon-prompt.md. No phone rebuild/install or App launch was performed.
-- Software implementation and simulator validation complete. make generate, JS syntax, plist lint, local documentation links and file whitespace checks passed; final regenerated project simulator build passed.
-- Follow-up requirements 7–14 complete: regression review/fixes, 爱壹帆 copy, pi investigation, scoped cleanup, signed Release install, focused UI text, and preserved no-TV-command boundary.
-- User has confirmed one actual television playback. Specific 爱壹帆 source, individual remote actions and lock-screen/Wi-Fi acceptance remain open; no-TV-command boundary remains for agent work. Personal Team weekly re-signing remains a maintenance constraint.
-- README/publication requirements 17 and 20 are complete. The target is https://github.com/ycl-2004/Webcast.git, main, with the existing local history preserved. Both README files were verified on GitHub; publication introduced no release tag or binary distribution.
+## Status
+Completed: R1–R8 core changes, installation and physical receiver acceptance. Signed Release 0.1.2 (4) is installed/developer-trusted and launch-verified on iPhone 15. Physical iPhone 15 / iOS 26.5 -> physical Chromecast core HLS controls passed; Release restored after Debug QA and receiver cleanup verified. Browser full UI, human picture/sound confirmation, lock/Wi-Fi recovery, soak, iOS 16/iPad/accessibility remain unaccepted and are documented. No commit, push or publication.
+
+## Physical iPhone continuation
+- The preceding permission question explicitly asked to update the current Apple team's development provisioning configuration, install on iPhone 15, and continue receiver tests. User replied: “允许安装，我刚才连上我的手机了，然后你可以帮我弄”. Treat this as approval for that scoped installation/signing workflow, not unrelated account changes.
+- iPhone 15 is currently available/paired. Preserve the verified business source; use a separate signed build directory and private raw logs.
+- R7 in progress: signed Release build, installation/version verification, then separate hardware acceptance if possible.
+
+### R7 installation progress
+- Signed Release 0.1.2 (4) built successfully using the existing team; codesign and bundle verification passed. Profile contains the connected phone and expires 2026-11-02T15:17:50Z.
+- Installed version changed from 0.1.1 (2) to 0.1.2 (4), confirmed via devicectl target-app metadata.
+- Launch was denied by iOS security/profile trust. User reports “Untrust”; developer trust is the immediate user action, not a failed installation. Do not automate acceptance of the trust prompt.
+
+### Physical receiver QA start
+- User reports developer trust completed and Webcast can be opened/used. Paired iPhone remains available.
+- Read-only receiver preflight: standby, original volume 1.0, unmuted.
+- Dedicated phone test suite was already signed/built successfully with existing configuration. Run scoped low-volume HLS controls; restore signed Release 0.1.2 (4) after the debug test host is used.
+
+### R7–R8 completion evidence
+- User completed developer trust; Release launch verified successfully after restoring final install.
+- Physical iPhone 15 / iOS 26.5 -> real Chromecast: 1 test passed, 0 failed/skipped; discovery, connection, HLS matching confirmation/position, pause/seek/resume, mute, stop, restored volume and disconnect all passed.
+- artifacts/iphone-2026-10-26.json records installed/reopened Release; artifacts/iphone-receiver-2026-10-26.json records core acceptance; artifacts/iphone-receiver-cleanup-2026-10-26.json confirms standby and restored volume/mute.
+- App/test/config source hashes unchanged; documentation links and diff whitespace checked. Raw phone/device logs and xcresult remain git-ignored under artifacts/private/iphone-2026-10-26. Temporary authorized test specification removed.

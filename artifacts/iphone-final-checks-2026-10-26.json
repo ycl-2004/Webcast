@@ -1,0 +1,9 @@
+{
+  "requirements": "R7-R8 completed",
+  "sourceUnchanged": true,
+  "physicalTest": "1 passed, 0 failed/skipped",
+  "releaseRestoredAndLaunched": true,
+  "receiverCleanup": "passed",
+  "localLinks": "passed",
+  "authorizedRunSpecRemoved": true
+}

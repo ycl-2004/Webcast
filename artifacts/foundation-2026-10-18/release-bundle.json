@@ -1,0 +1,8 @@
+{
+  "bundle": "dev.yc.Webcast",
+  "configuration": "Release",
+  "result": "Passed",
+  "appPrivacyManifest": true,
+  "castPrivacyManifest": true,
+  "snifferScript": true
+}
