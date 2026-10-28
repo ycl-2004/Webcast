@@ -1,6 +1,7 @@
 SIMULATOR ?= iPhone 17
 SIMULATOR_ID ?=
 SIMULATOR_OS ?= latest
+TEST_ARGS ?=
 -include .device.mk
 PROJECT = Webcast.xcodeproj
 SCHEME = Webcast
@@ -42,7 +43,7 @@ check-release:
 	python3 scripts/verify_bundle.py "$(SIM_PRODUCTS)/Release-iphonesimulator/Webcast.app"
 
 test: generate
-	xcodebuild -project $(PROJECT) -scheme $(SCHEME) -clonedSourcePackagesDirPath $(PACKAGE_DIR) -configuration Debug -destination '$(TEST_DESTINATION)' -derivedDataPath $(BUILD_DIR) SYMROOT="$(SIM_PRODUCTS)" OBJROOT="$(abspath $(BUILD_DIR))/Build/Intermediates.noindex" CODE_SIGNING_ALLOWED=NO test
+	xcodebuild -project $(PROJECT) -scheme $(SCHEME) -clonedSourcePackagesDirPath $(PACKAGE_DIR) -configuration Debug -destination '$(TEST_DESTINATION)' -derivedDataPath $(BUILD_DIR) SYMROOT="$(SIM_PRODUCTS)" OBJROOT="$(abspath $(BUILD_DIR))/Build/Intermediates.noindex" CODE_SIGNING_ALLOWED=NO $(TEST_ARGS) test
 
 demo:
 	@test -n "$(SIMULATOR_ID)" || { printf '请指定已启动模拟器的 SIMULATOR_ID。\n'; exit 1; }

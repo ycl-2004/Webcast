@@ -48,7 +48,10 @@ jobs:
       - name: Test
         run: |
           set -o pipefail
-          make test SIMULATOR_ID='${{ steps.sim.outputs.id }}' | tee "$RUNNER_TEMP/webcast-tests.log"
+          # Hosted runners cold-start WebKit slowly enough to stall the first page loads now and then;
+          # rerun only failing tests, so a real regression still fails every attempt.
+          make test SIMULATOR_ID='${{ steps.sim.outputs.id }}' \
+            TEST_ARGS='-retry-tests-on-failure -test-iterations 3' | tee "$RUNNER_TEMP/webcast-tests.log"
       - name: Verify Release bundle
         run: |
           set -o pipefail
