@@ -305,9 +305,8 @@ final class SnifferIntegrationTests: XCTestCase {
           webkit.messageHandlers.videoSniffer.postMessage({cancelledClones, cancelledOriginals,
             readable:new TextDecoder().decode(first.value).startsWith('#EXTM3U')});
         })();</script>
-        """, probe: probe, setup: trackedStreamingFetch)
-        // Allow extra time for WebKit startup and timer scheduling on hosted simulators.
-        await fulfillment(of: [completed], timeout: 25)
+        """, probe: probe, setup: trackedStreamingFetch, visible: true)
+        await fulfillment(of: [completed], timeout: 10)
         withExtendedLifetime(view) {}
     }
 
