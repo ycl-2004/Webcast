@@ -306,7 +306,8 @@ final class SnifferIntegrationTests: XCTestCase {
             readable:new TextDecoder().decode(first.value).startsWith('#EXTM3U')});
         })();</script>
         """, probe: probe, setup: trackedStreamingFetch)
-        await fulfillment(of: [completed], timeout: 10)
+        // Allow extra time for WebKit startup and timer scheduling on hosted simulators.
+        await fulfillment(of: [completed], timeout: 25)
         withExtendedLifetime(view) {}
     }
 
