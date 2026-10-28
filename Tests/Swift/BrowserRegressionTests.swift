@@ -1,6 +1,5 @@
 import XCTest
 import WebKit
-import UIKit
 @testable import Webcast
 
 @MainActor
@@ -36,29 +35,13 @@ private final class PromptProbe: NSObject, WKUIDelegate {
 
 final class BrowserRegressionTests: XCTestCase {
     /// 每个用例独立的 UserDefaults 与数据存储；默认起始页，避免启动即联网
-    @MainActor private func makeBrowser(dataStore: WKWebsiteDataStore? = nil, defaultPage: String = "start", visible: Bool = false) throws -> (BrowserModel, UserDefaults) {
+    @MainActor private func makeBrowser(dataStore: WKWebsiteDataStore? = nil, defaultPage: String = "start") throws -> (BrowserModel, UserDefaults) {
         let suite = "webcast.review.\(UUID().uuidString)"
         let defaults = try XCTUnwrap(UserDefaults(suiteName: suite))
         addTeardownBlock { defaults.removePersistentDomain(forName: suite) }
         defaults.set(defaultPage, forKey: SettingsKeys.defaultPage)
         let browser = BrowserModel(defaults: defaults, dataStore: dataStore ?? .nonPersistent())
-        guard visible else { return (browser, defaults) }
-        // WebKit may suspend detached pages, especially during cold startup on newer runtimes.
-        // Exercise navigation in a visible window, as the real browser does.
-        let scene = try XCTUnwrap(UIApplication.shared.connectedScenes.compactMap { $0 as? UIWindowScene }.first)
-        let previous = scene.windows.first { $0.isKeyWindow }
-        let window = UIWindow(windowScene: scene)
-        let controller = UIViewController()
-        controller.view = browser.webView
-        window.rootViewController = controller
-        window.makeKeyAndVisible()
-        addTeardownBlock {
-            await MainActor.run {
-                window.isHidden = true
-                window.rootViewController = nil
-                previous?.makeKeyAndVisible()
-            }
-        }
+        try showInKeyWindow(browser.webView)
         return (browser, defaults)
     }
 
@@ -233,7 +216,7 @@ final class BrowserRegressionTests: XCTestCase {
 
     /// 后退回上一页（含往返缓存恢复）后，原页面的视频要重新出现在列表里
     @MainActor func testBackNavigationRestoresPreviousPageVideos() async throws {
-        let (browser, _) = try makeBrowser(visible: true)
+        let (browser, _) = try makeBrowser()
         let directory = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
         try FileManager.default.createDirectory(at: directory, withIntermediateDirectories: true)
         addTeardownBlock { try? FileManager.default.removeItem(at: directory) }
@@ -279,7 +262,7 @@ final class BrowserRegressionTests: XCTestCase {
         browser.stopLoading()
     }
     @MainActor func testManyUncommittedNavigationsAreBoundedAndKeepCurrentDocumentAlive() async throws {
-        let (browser, _) = try makeBrowser(visible: true)
+        let (browser, _) = try makeBrowser()
         browser.webView.loadHTMLString("<video id='v' src='https://cdn.example/original.mp4'></video>",
                                        baseURL: URL(string: "https://fixture.review"))
         try await waitUntil("original video") { candidateURLs(browser).contains("https://cdn.example/original.mp4") }
@@ -294,15 +277,6 @@ final class BrowserRegressionTests: XCTestCase {
 
     @MainActor func testRepeatedSPARoutesAndFragmentChangesPreserveCurrentPageMedia() async throws {
         let (browser, _) = try makeBrowser()
-        // Visible browsing uses foreground timers; detached WKWebViews throttle them to ~1s.
-        let scene = try XCTUnwrap(UIApplication.shared.connectedScenes.compactMap { $0 as? UIWindowScene }.first)
-        let previous = scene.windows.first { $0.isKeyWindow }
-        let window = UIWindow(windowScene: scene)
-        let controller = UIViewController()
-        controller.view = browser.webView
-        window.rootViewController = controller
-        window.makeKeyAndVisible()
-        defer { window.isHidden = true; window.rootViewController = nil; previous?.makeKeyAndVisible() }
         browser.webView.loadHTMLString("<video src='https://cdn.example/initial.mp4'></video>",
                                        baseURL: URL(string: "https://fixture.review/start"))
         try await waitUntil("initial media") { !browser.sniffer.candidates.isEmpty }

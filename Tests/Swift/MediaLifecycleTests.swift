@@ -9,7 +9,9 @@ final class MediaLifecycleTests: XCTestCase {
         let defaults = try XCTUnwrap(UserDefaults(suiteName: name))
         defaults.set("start", forKey: SettingsKeys.defaultPage)
         addTeardownBlock { defaults.removePersistentDomain(forName: name) }
-        return BrowserModel(defaults: defaults, dataStore: .nonPersistent())
+        let browser = BrowserModel(defaults: defaults, dataStore: .nonPersistent())
+        try showInKeyWindow(browser.webView)
+        return browser
     }
 
     @MainActor private func waitFor(file: StaticString = #filePath, line: UInt = #line, _ condition: () -> Bool) async throws {

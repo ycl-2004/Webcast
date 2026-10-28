@@ -58,7 +58,9 @@ final class SnifferSecurityTests: XCTestCase {
         let defaults = try XCTUnwrap(UserDefaults(suiteName:name))
         defaults.set("start", forKey:SettingsKeys.defaultPage)
         addTeardownBlock { defaults.removePersistentDomain(forName:name) }
-        return BrowserModel(defaults:defaults, dataStore:.nonPersistent())
+        let browser = BrowserModel(defaults:defaults, dataStore:.nonPersistent())
+        try showInKeyWindow(browser.webView)
+        return browser
     }
 
     @MainActor private func waitFor(_ predicate: () -> Bool) async throws {
@@ -130,6 +132,7 @@ final class SnifferSecurityTests: XCTestCase {
         """
         sniffer.prepareNavigation(controller:controller, source:setup + "\n" + (try VideoSniffer.scriptSource()))
         let view = WKWebView(frame:CGRect(x:0, y:0, width:320, height:480), configuration:configuration)
+        try showInKeyWindow(view)
         view.loadHTMLString("<script>fetch('/stream');</script>", baseURL:URL(string:"https://fixture.example"))
         try await waitFor { sniffer.candidates.first?.isLive == false }
         XCTAssertEqual(sniffer.candidates.first?.url.absoluteString, "https://cdn.example/from-fetch.m3u8?token=a%2Fb")

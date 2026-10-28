@@ -14,7 +14,7 @@ private final class ScriptProbe: NSObject, WKScriptMessageHandler {
 }
 
 final class SnifferIntegrationTests: XCTestCase {
-    @MainActor private func fixture(_ html: String, probe: ScriptProbe, setup: String = "", visible: Bool = false) throws -> WKWebView {
+    @MainActor private func fixture(_ html: String, probe: ScriptProbe, setup: String = "") throws -> WKWebView {
         let controller = WKUserContentController()
         controller.add(probe, name: "videoSniffer")
         let diagnostics = """
@@ -27,24 +27,7 @@ final class SnifferIntegrationTests: XCTestCase {
         let configuration = WKWebViewConfiguration()
         configuration.userContentController = controller
         let view = WKWebView(frame: CGRect(x: 0, y: 0, width: 320, height: 480), configuration: configuration)
-        if visible {
-            // Route/timer fixtures must stay foregrounded, as in the actual browser.
-            let scene = try XCTUnwrap(UIApplication.shared.connectedScenes.compactMap { $0 as? UIWindowScene }.first)
-            let previous = scene.windows.first { $0.isKeyWindow }
-            let window = UIWindow(windowScene: scene)
-            let controller = UIViewController()
-            controller.view = view
-            window.rootViewController = controller
-            window.makeKeyAndVisible()
-            addTeardownBlock {
-                await MainActor.run {
-                    view.stopLoading()
-                    window.isHidden = true
-                    window.rootViewController = nil
-                    previous?.makeKeyAndVisible()
-                }
-            }
-        }
+        try showInKeyWindow(view)
         view.loadHTMLString(html, baseURL: URL(string:"https://fixture.example"))
         return view
     }
@@ -305,7 +288,7 @@ final class SnifferIntegrationTests: XCTestCase {
           webkit.messageHandlers.videoSniffer.postMessage({cancelledClones, cancelledOriginals,
             readable:new TextDecoder().decode(first.value).startsWith('#EXTM3U')});
         })();</script>
-        """, probe: probe, setup: trackedStreamingFetch, visible: true)
+        """, probe: probe, setup: trackedStreamingFetch)
         await fulfillment(of: [completed], timeout: 10)
         withExtendedLifetime(view) {}
     }
@@ -371,7 +354,7 @@ final class SnifferIntegrationTests: XCTestCase {
           await new Promise(resolve => setTimeout(resolve, 100));
           webkit.messageHandlers.videoSniffer.postMessage({finished:true});
         })();</script>
-        """, probe: probe, setup: setup, visible: true)
+        """, probe: probe, setup: setup)
         await fulfillment(of: [completed], timeout: 10)
         withExtendedLifetime(view) {}
     }
