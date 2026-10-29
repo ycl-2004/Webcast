@@ -1,0 +1,654 @@
+--- baseline/Webcast/Localizable.xcstrings
++++ current/Webcast/Localizable.xcstrings
+@@ -828,6 +828,18 @@
+         "en" : {"stringUnit": {"state": "translated", "value": "Choose Chromecast"}},
+         "zh-Hant" : {"stringUnit": {"state": "translated", "value": "選擇 Chromecast"}}
+       }
++    },
++    "连接等待超时" : {
++      "localizations" : {
++        "en" : {"stringUnit": {"state": "translated", "value": "Connection timed out"}},
++        "zh-Hant" : {"stringUnit": {"state": "translated", "value": "連線等待逾時"}}
++      }
++    },
++    "连接等待超时。请检查电视和本地网络，或停止并断开后重试。" : {
++      "localizations" : {
++        "en" : {"stringUnit": {"state": "translated", "value": "Connection timed out. Check the TV and local network, or stop and disconnect before trying again."}},
++        "zh-Hant" : {"stringUnit": {"state": "translated", "value": "連線等待逾時。請檢查電視和區域網路，或停止並中斷連線後重試。"}}
++      }
+     }
+   },
+   "version" : "1.0"
+--- baseline/Webcast/Info.plist
++++ current/Webcast/Info.plist
+@@ -19,7 +19,7 @@
+ 	<key>CFBundleShortVersionString</key>
+ 	<string>0.1.2</string>
+ 	<key>CFBundleVersion</key>
+-	<string>3</string>
++	<string>4</string>
+ 	<key>ITSAppUsesNonExemptEncryption</key>
+ 	<false/>
+ 	<key>LSRequiresIPhoneOS</key>
+--- baseline/Webcast/Sniffer/sniff.js
++++ current/Webcast/Sniffer/sniff.js
+@@ -2,6 +2,9 @@
+   "use strict";
+   if (window.__webcastInstalled) return;
+   window.__webcastInstalled = true;
++  // Production runs a page-world network collector and an isolated DOM/bridge observer.
++  // The combined mode is useful for controlled script fixtures.
++  const mode = window.__webcastMode || "combined";
+   const generation = window.__webcastGeneration || "";
+   const frameID = Math.random().toString(36).slice(2) + Date.now();
+   const limit = 512 * 1024;
+@@ -50,7 +53,20 @@
+   }
+ 
+   function post(payload) {
+-    try { window.webkit.messageHandlers.videoSniffer.postMessage({...payload, generation, frameID, pageURL:location.href, title:document.title}); }
++    try {
++      if (mode === "network") {
++        if (payload.type === "route") window.postMessage({webcastRouteChanged:true}, "*");
++        if (payload.url) {
++          const record = {...payload, parentURL:parents.get(payload.url)};
++          for (const key of Object.keys(record)) { if (record[key] === undefined) delete record[key]; }
++          window.postMessage({webcastNetwork:record, webcastRouteKey:routeKey()}, "*");
++        }
++        return;
++      }
++      const body = {...payload, generation, frameID, pageURL:location.href, title:document.title.slice(0, 300)};
++      for (const key of Object.keys(body)) { if (body[key] === undefined) delete body[key]; }
++      window.webkit.messageHandlers.videoSniffer.postMessage(body);
++    }
+     catch (_) { /* A broken bridge must never break the site's player. */ }
+   }
+ 
+@@ -139,8 +155,42 @@
+       extra.drm = /<ContentProtection[\s>]/i.test(text);
+     }
+     report(url, source, extra);
++    if (mode !== "network") document.querySelectorAll("video").forEach(video => { if (!video.paused) activeVideo(video); });
++  }
++
++  if (mode === "dom") window.addEventListener("message", event => {
++    if (event.source !== window) return;
++    // pushState runs in the page world. Re-read the actual shared location rather than
++    // trusting any URL or lifecycle instruction included in a page message.
++    changedRoute();
++    const input = event.data && event.data.webcastNetwork;
++    if (!input || typeof input !== "object" || Array.isArray(input)) return;
++    if (event.data.webcastRouteKey !== routeKey()) return;
++    // Page messages may only describe network media. They cannot send lifecycle/current flags,
++    // frame identity or generation to the native bridge.
++    const strings = {url:16384, mime:256, manifest:16, segmentFormat:8, source:16, parentURL:16384};
++    const flags = ["master", "live", "drm"];
++    if (Object.keys(input).length > 12) return;
++    for (const [key, value] of Object.entries(input)) {
++      if (strings[key]) { if (typeof value !== "string" || value.length > strings[key]) return; }
++      else if (flags.includes(key)) { if (typeof value !== "boolean") return; }
++      else if (key === "time") { if (typeof value !== "number" || !Number.isFinite(value)) return; }
++      else return;
++    }
++    if (!["fetch", "xhr", "video", "source"].includes(input.source) ||
++        (input.manifest !== undefined && input.manifest !== "#EXTM3U") ||
++        (input.segmentFormat !== undefined && !["ts", "fmp4"].includes(input.segmentFormat))) return;
++    const url = normalize(input.url);
++    if (!url || !format(url, input.mime, input.manifest)) return;
++    const {parentURL, time, source, ...metadata} = input;
++    if (metadata.manifest === "#EXTM3U") {
++      remember(manifests, url, {...metadata, time:Date.now()}, 100);
++      latestManifest = url;
++    }
++    if (parentURL && normalize(parentURL)) remember(parents, url, normalize(parentURL), 200);
++    report(url, source, metadata);
+     document.querySelectorAll("video").forEach(video => { if (!video.paused) activeVideo(video); });
+-  }
++  });
+ 
+   // Native HLS requests bypass fetch/XHR, so observe both property setters and DOM mutations.
+   function hookSrc(proto) {
+@@ -185,7 +235,7 @@
+   }
+   // The parent can observe frame removal even when a detached child gets no pagehide event.
+   // Only accept a registration from an actual direct child WindowProxy.
+-  window.addEventListener("message", event => {
++  if (mode !== "network") window.addEventListener("message", event => {
+     const child = event.data && event.data.webcastFrameID;
+     if (typeof child !== "string" || child.length > 100) return;
+     const frame = [...document.querySelectorAll("iframe, frame")].find(f => f.contentWindow === event.source);
+@@ -198,6 +248,7 @@
+   function announceFrame() {
+     if (window.parent !== window) window.parent.postMessage({webcastFrameID:frameID}, "*");
+   }
++  if (mode !== "network") {
+   announceFrame();
+   new MutationObserver(records => {
+     for (const record of records) {
+@@ -224,6 +275,7 @@
+   }
+   document.addEventListener("DOMContentLoaded", scan);
+   scan();
++  }
+ 
+   function readManifest(response, mime, requestVersion) {
+     if (inspections.size >= 4 || requestVersion !== routeVersion) return;
+@@ -259,7 +311,7 @@
+     })().catch(() => {});
+   }
+ 
+-  if (window.fetch) {
++  if (mode !== "dom" && window.fetch) {
+     const originalFetch = window.fetch;
+     window.fetch = function() {
+       const requestVersion = routeVersion;
+@@ -278,6 +330,7 @@
+     };
+   }
+ 
++  if (mode !== "dom") {
+   const originalOpen = XMLHttpRequest.prototype.open;
+   const xhrMetadata = new WeakMap();
+   const listened = new WeakSet();
+@@ -297,6 +350,7 @@
+     }
+     return originalOpen.apply(this, arguments);
+   };
++  }
+ 
+   function changedRoute() {
+     if (route === routeKey()) return;
+@@ -305,9 +359,9 @@
+     cancelInspections();
+     sent.clear(); manifests.clear(); parents.clear(); latestManifest = null;
+     post({type:"route"});
+-    scan();
++    if (mode !== "network") scan();
+     // A surviving player can be paused; keep its activity without inventing a new playback.
+-    if (activeElement) activeVideo(activeElement);
++    if (mode !== "network" && activeElement) activeVideo(activeElement);
+   }
+   for (const method of ["pushState", "replaceState"]) {
+     const original = history[method];
+@@ -319,13 +373,15 @@
+ 
+   // A back/forward cache restore reuses this document without rerunning the script, but the app
+   // cleared its list when the restore committed: re-announce this frame and replay its reports.
+-  window.addEventListener("pageshow", event => {
+-    if (!event.persisted) return;
++  function replay() {
++    if (mode === "network") return;
+     post({type:"restored"});
+     announceFrame();
+     // Replay the active item last, even if it was inserted before a later, now inactive video.
+     for (const [url, signature] of sent) { if (url !== activeURL) post({...JSON.parse(signature), current:false}); }
+     // A later DOM scan may have cached metadata without a current flag.
+     if (sent.has(activeURL)) post({...JSON.parse(sent.get(activeURL)), current:true});
+-  });
++  }
++  if (mode === "dom") window.__webcastReplay = replay;
++  window.addEventListener("pageshow", event => { if (event.persisted) replay(); });
+ })();
+--- baseline/Webcast/Sniffer/VideoSniffer.swift
++++ current/Webcast/Sniffer/VideoSniffer.swift
+@@ -11,7 +11,13 @@
+     /// 页内锚点跳转、加载失败留在原页时，原页面的上报仍然有效。
+     private(set) var acceptedGenerations: [String] = []
+     private var documentGeneration: String?
++    private var issuedGenerations: [String] = []
++    private var budget = SnifferMessageBudget()
++    private var publication: Task<Void, Never>?
++    private var deferred: [String: [String: Any]] = [:]
++    private var drain: Task<Void, Never>?
+     var playbackRevision: UUID { store.playbackRevision }
++    func latestCandidate(for id: String) -> VideoCandidate? { store.items[id] }
+ 
+     private func accept(_ value: String) {
+         acceptedGenerations.removeAll { $0 == value }
+@@ -33,13 +39,19 @@
+ 
+     func prepareNavigation(controller: WKUserContentController, source: String) {
+         generation = UUID().uuidString
++        issuedGenerations.append(generation)
++        if issuedGenerations.count > 200 { issuedGenerations.removeFirst() }
+         accept(generation)
+         controller.removeAllUserScripts()
+-        // Page world is necessary to intercept the site's fetch and native media setters.
+-        // https://developer.apple.com/documentation/webkit/wkuserscript
++        // Only network hooks share the page's JS world. The native bridge and DOM lifecycle
++        // live in defaultClient, whose global objects cannot be accessed by the website.
++        // https://developer.apple.com/documentation/webkit/wkcontentworld/defaultclient
+         controller.addUserScript(WKUserScript(
+-            source: "window.__webcastGeneration = '\(generation)';\n" + source,
+-            injectionTime: .atDocumentStart, forMainFrameOnly: false))
++            source: "window.__webcastMode = 'network';\n" + source,
++            injectionTime: .atDocumentStart, forMainFrameOnly: false, in: .page))
++        controller.addUserScript(WKUserScript(
++            source: "window.__webcastMode = 'dom'; window.__webcastGeneration = '\(generation)';\n" + source,
++            injectionTime: .atDocumentStart, forMainFrameOnly: false, in: .defaultClient))
+     }
+ 
+     /// 主框架提交了新文档：旧页面的候选与代次一并作废
+@@ -49,14 +61,68 @@
+         reset()
+     }
+ 
+-    func reset() { store.reset(); candidates = [] }
++    /// A native post-commit query of the isolated world handles cache-event/commit ordering.
++    @discardableResult
++    func restoreCommittedGeneration(_ value: String) -> Bool {
++        guard issuedGenerations.contains(value) else { return false }
++        documentGeneration = value
++        acceptedGenerations = [value]
++        return true
++    }
++
++    func reset() {
++        publication?.cancel(); publication = nil
++        drain?.cancel(); drain = nil; deferred.removeAll()
++        budget = SnifferMessageBudget()
++        store.reset(); candidates = []
++    }
++
++    private func publishSoon() {
++        guard publication == nil else { return }
++        publication = Task { @MainActor [weak self] in
++            try? await Task.sleep(nanoseconds: 50_000_000)
++            guard !Task.isCancelled, let self else { return }
++            let next = store.sorted
++            if candidates != next { candidates = next }
++            publication = nil
++        }
++    }
++
++    private func deferObservation(_ body: [String: Any], frame: String) {
++        guard deferred[frame] != nil || deferred.count < 100 else { return }
++        deferred[frame] = body // Preserve the latest observation after a burst, not the whole backlog.
++        guard drain == nil else { return }
++        drain = Task { @MainActor [weak self] in
++            try? await Task.sleep(nanoseconds: 250_000_000)
++            guard !Task.isCancelled, let self else { return }
++            let pending = deferred
++            deferred.removeAll(); drain = nil
++            for (frame, body) in pending {
++                guard let generation = body["generation"] as? String, acceptedGenerations.contains(generation) else { continue }
++                if budget.allow(frame: frame, lifecycle: false) {
++                    if store.ingest(body) { publishSoon() }
++                } else { deferObservation(body, frame: frame) }
++            }
++        }
++    }
+ 
+     func userContentController(_ userContentController: WKUserContentController, didReceive message: WKScriptMessage) {
+         guard message.name == "videoSniffer", let body = message.body as? [String: Any],
+-              let messageGeneration = body["generation"] as? String else { return }
+-        let frame = String((body["frameID"] as? String ?? "main").prefix(100))
++              SnifferPayload.validate(body),
++              let messageGeneration = body["generation"] as? String,
++              let frame = body["frameID"] as? String, !frame.isEmpty else { return }
++        let type = body["type"] as? String
++        guard acceptedGenerations.contains(messageGeneration) || type == "restored" else { return }
++        var observation = body
++        observation["pageURL"] = message.frameInfo.request.url?.absoluteString
++        guard budget.allow(frame: frame, lifecycle: type != nil) else {
++            if type == nil { deferObservation(observation, frame: frame) }
++            return
++        }
+         switch body["type"] as? String {
+         case "restored":
++            guard issuedGenerations.contains(messageGeneration),
++                  message.frameInfo.isMainFrame || acceptedGenerations.contains(messageGeneration) else { return }
+             // 往返缓存恢复的页面不会重跑脚本，仍带着当初的代次；接纳后它会重放之前的上报
+             if message.frameInfo.isMainFrame { documentGeneration = messageGeneration }
+             accept(messageGeneration)
+@@ -67,18 +133,22 @@
+         }
+         guard acceptedGenerations.contains(messageGeneration) else { return }
+         switch body["type"] as? String {
+-        case "route": store.clearFrame(frame)
+-        case "inactive": store.deactivate(frame: frame)
+-        case "frameGone": store.removeFrame(frame)
++        case "route": deferred.removeValue(forKey: frame); store.clearFrame(frame)
++        case "inactive":
++            // A queued current flag must never reactivate a player after its cleanup event.
++            deferred.removeValue(forKey: frame); store.deactivate(frame: frame)
++        case "frameGone":
++            deferred.removeValue(forKey: frame); store.removeFrame(frame); budget.remove(frame: frame)
+         case "frameLinked":
+             if let child = body["childFrameID"] as? String, child.count <= 100 { store.linkFrame(child, parent: frame) }
+         case "frameRemoved":
+             if let child = body["childFrameID"] as? String, child.count <= 100 { store.removeFrame(child) }
+         default:
+-            if !store.ingest(body) { return }
++            deferred.removeValue(forKey: frame)
++            if !store.ingest(observation) { return }
+         }
+         // The bridge accepts media data only; it can never connect to or command a TV.
+-        candidates = store.sorted
++        publishSoon()
+     }
+ }
+ 
+--- baseline/Webcast/Cast/CastManager.swift
++++ current/Webcast/Cast/CastManager.swift
+@@ -20,6 +20,10 @@
+ final class CastManager: NSObject, ObservableObject {
+     @Published private(set) var devices: [CastDevice] = []
+     @Published private(set) var connection: CastConnection = .disconnected
++    @Published private(set) var connectionWaitExpired = false
++    private var connectionWait = CastConnectionWait()
++    private var connectionWaitTask: Task<Void, Never>?
++    let pendingCastCancellations = PassthroughSubject<Void, Never>()
+     @Published private(set) var deviceName = ""
+     /// 当前会话（或正在连接）的电视；设备列表按 ID 标记状态，同名电视也不会混淆
+     @Published private(set) var deviceID: String?
+@@ -75,14 +79,20 @@
+     }
+     var canControl: Bool { !offlineValidation && connection == .connected }
+ 
+-    override init() {
++    override convenience init() {
+         #if DEBUG
+         let environment = ProcessInfo.processInfo.environment
+-        offlineValidation = environment["WEBCAST_OFFLINE_VALIDATION"] == "1"
++        let offline = environment["WEBCAST_OFFLINE_VALIDATION"] == "1"
+             || environment["XCTestConfigurationFilePath"] != nil
+         #else
+-        offlineValidation = false
++        let offline = false
+         #endif
++        self.init(offlineValidation: offline)
++    }
++
++    /// Explicit construction lets the separate, opt-in receiver suite exercise this same manager.
++    init(offlineValidation: Bool) {
++        self.offlineValidation = offlineValidation
+         if offlineValidation {
+             context = nil
+         } else {
+@@ -116,7 +126,28 @@
+         }
+     }
+ 
+-    deinit { timer?.invalidate() }
++    deinit { timer?.invalidate(); connectionWaitTask?.cancel() }
++
++    private func startConnectionWait() {
++        connectionWaitTask?.cancel()
++        connectionWaitExpired = false
++        connectionWait.begin()
++        connectionWaitTask = Task { @MainActor [weak self] in
++            try? await Task.sleep(nanoseconds: 30_000_000_000)
++            guard !Task.isCancelled, let self, connection == .connecting || connection == .suspended,
++                  connectionWait.expire() else { return }
++            connectionWaitExpired = true
++            switchTarget = nil
++            pendingCastCancellations.send(())
++            recordFailure(.connect)
++            errorMessage = String(localized: "连接等待超时。请检查电视和本地网络，或停止并断开后重试。")
++        }
++    }
++
++    private func finishConnectionWait() {
++        connectionWaitTask?.cancel(); connectionWaitTask = nil
++        connectionWait.reset(); connectionWaitExpired = false
++    }
+ 
+     /// 只在有活动会话时开启每秒轮询；断开后挂起，避免长期待机空转
+     private func updateTimerState() {
+@@ -132,12 +163,17 @@
+     }
+ 
+     var connectionLabel: String {
++        if connectionWaitExpired { return String(localized: "连接等待超时") }
+         switch connection {
+         case .disconnected: return String(localized: "未连接电视")
+         case .connecting: return String(localized: "正在连接…")
+         case .connected: return deviceName.isEmpty ? String(localized: "已连接") : deviceName
+         case .suspended: return String(localized: "等待恢复连接…")
+         }
++    }
++
++    func suspendConnectionWait() {
++        connectionWaitTask?.cancel(); connectionWait.reset()
+     }
+ 
+     /// 上次连接过、当前在线的电视
+@@ -187,6 +223,8 @@
+     func disconnect() {
+         guard let context, !offlineValidation else { return }
+         switchTarget = nil
++        pendingCastCancellations.send(())
++        finishConnectionWait()
+         if !context.sessionManager.endSessionAndStopCasting(true) {
+             recordFailure(.disconnect)
+             errorMessage = String(localized: "暂时无法断开，请重试。")
+@@ -197,6 +235,7 @@
+     func load(_ candidate: VideoCandidate, origin: BrowserPlaybackContext? = nil) -> Bool {
+         guard canControl, let client = mediaClient else { errorMessage = String(localized: "请先连接 Chromecast。"); return false }
+         guard !isLoading else { return false }
++        guard SnifferPayload.mediaURL(candidate.url.absoluteString) != nil else { return false }
+         guard !candidate.isDRM else { errorMessage = String(localized: "这个视频需要 DRM 授权，暂时无法投屏。"); return false }
+         errorMessage = nil
+         let request = client.loadMedia(with: MediaLoader.request(for: candidate))
+@@ -279,6 +318,7 @@
+ 
+     func refreshSession() {
+         guard let session = context?.sessionManager.currentCastSession else {
++            finishConnectionWait()
+             mediaClient?.remove(self)
+             mediaClient = nil
+             connection = .disconnected
+@@ -290,7 +330,7 @@
+         }
+         deviceName = session.device.friendlyName ?? "Chromecast"
+         deviceID = session.device.uniqueID
+-        if session.connectionState == .connected { connection = .connected }
++        if session.connectionState == .connected { connection = .connected; finishConnectionWait() }
+         let nextClient = session.remoteMediaClient
+         if mediaClient !== nextClient {
+             mediaClient?.remove(self)
+@@ -384,7 +424,9 @@
+ }
+ 
+ extension CastManager: @preconcurrency GCKSessionManagerListener {
+-    func sessionManager(_ sessionManager: GCKSessionManager, willStart session: GCKCastSession) { connection = .connecting }
++    func sessionManager(_ sessionManager: GCKSessionManager, willStart session: GCKCastSession) {
++        connection = .connecting; startConnectionWait()
++    }
+     func sessionManager(_ sessionManager: GCKSessionManager, didStart session: GCKCastSession) {
+         rememberDevice(session)
+         refreshSession()
+@@ -396,8 +438,12 @@
+     }
+     func sessionManager(_ sessionManager: GCKSessionManager, didSuspend session: GCKCastSession, with reason: GCKConnectionSuspendReason) {
+         connection = .suspended
++        connectionWaitTask?.cancel(); connectionWait.reset()
+         updateTimerState()
+         updateNowPlaying(reset: true)
++    }
++    func beginForegroundRecoveryWait() {
++        if connection == .suspended { startConnectionWait() }
+     }
+     func sessionManager(_ sessionManager: GCKSessionManager, didEnd session: GCKCastSession, withError error: Error?) {
+         refreshSession()
+--- baseline/Webcast/Models/VideoCandidate.swift
++++ current/Webcast/Models/VideoCandidate.swift
+@@ -147,12 +147,8 @@
+ 
+     @discardableResult
+     mutating func ingest(_ payload: [String: Any], now: Date = Date()) -> Bool {
+-        guard let raw = payload["url"] as? String, raw.count <= 16384,
+-              var components = URLComponents(string: raw),
+-              ["http", "https"].contains(components.scheme?.lowercased() ?? ""),
+-              components.host != nil, components.user == nil, components.password == nil else { return false }
+-        components.fragment = nil
+-        guard let url = components.url,
++        guard SnifferPayload.validate(payload), let raw = payload["url"] as? String,
++              let url = SnifferPayload.mediaURL(raw),
+               let format = VideoFormat.detect(url: url, mime: payload["mime"] as? String ?? "",
+                                               manifest: payload["manifest"] as? String ?? "") else { return false }
+         let key = url.absoluteString
+--- baseline/Webcast/Browser/BrowserModel.swift
++++ current/Webcast/Browser/BrowserModel.swift
+@@ -77,7 +77,7 @@
+         // 检测桥必须在任何提前返回之前注册：从起始页或演示页出发的导航同样要检测视频。
+         // 检测脚本本身在每次主框架导航时由 decidePolicyFor 注入。
+         if !script.isEmpty {
+-            configuration.userContentController.add(WeakScriptHandler(sniffer), name: "videoSniffer")
++            configuration.userContentController.add(WeakScriptHandler(sniffer), contentWorld: .defaultClient, name: "videoSniffer")
+         }
+         #if DEBUG
+         if ProcessInfo.processInfo.environment["WEBCAST_DEMO"] == "1" {
+@@ -227,8 +227,10 @@
+     }
+ 
+     func castIntent(for candidate: VideoCandidate) -> CastIntent {
+-        let current = sniffer.candidates.contains { $0.id == candidate.id && $0.isCurrent }
+-        return CastIntent(candidate: candidate, origin: current ? playbackContext : nil)
++        // Presentation is coalesced. Authorization/handoff must read the immediate store,
++        // or an old list row could arm a pause for a newer local video.
++        let latest = sniffer.latestCandidate(for:candidate.id)
++        return CastIntent(candidate: latest ?? candidate, origin: latest?.isCurrent == true ? playbackContext : nil)
+     }
+ 
+     func handleCastLoad(_ event: CastLoadEvent) {
+@@ -290,6 +292,13 @@
+         documentID = UUID()
+         playbackHandoff.reset()
+         sniffer.documentCommitted()
++        let committedDocument = documentID
++        webView.callAsyncJavaScript("return window.__webcastGeneration;", arguments:[:], in:nil, in:.defaultClient) { [weak self] result in
++            guard let self, documentID == committedDocument,
++                  case .success(let value) = result, let generation = value as? String,
++                  sniffer.restoreCommittedGeneration(generation) else { return }
++            webView.callAsyncJavaScript("window.__webcastReplay?.(); return true;", arguments:[:], in:nil, in:.defaultClient) { _ in }
++        }
+     }
+     func webView(_ webView: WKWebView, didFinish navigation: WKNavigation!) {
+         if let clearing = dataClearNavigation, navigation === clearing { removeWebsiteData() }
+--- baseline/Webcast/Views/RemoteView.swift
++++ current/Webcast/Views/RemoteView.swift
+@@ -92,6 +92,10 @@
+ 
+     @ViewBuilder
+     private var statusEyebrow: some View {
++        if cast.connectionWaitExpired {
++            Label("连接等待超时", systemImage:"wifi.exclamationmark")
++                .font(.subheadline.weight(.medium)).foregroundStyle(.secondary)
++        } else {
+         switch cast.connection {
+         case .connecting:
+             Label("正在连接电视…", systemImage: "tv")
+@@ -105,6 +109,7 @@
+             Label("未连接电视", systemImage: "tv")
+                 .font(.subheadline.weight(.medium))
+                 .foregroundStyle(.secondary)
++        }
+         }
+     }
+ 
+--- baseline/Webcast/Views/DevicePicker.swift
++++ current/Webcast/Views/DevicePicker.swift
+@@ -40,7 +40,7 @@
+                                             Text(device.detail).font(.caption).foregroundStyle(.secondary)
+                                         }
+                                         Spacer()
+-                                        if isCurrent && cast.connection == .connecting { ProgressView() }
++                                        if isCurrent && cast.connection == .connecting && !cast.connectionWaitExpired { ProgressView() }
+                                         else if isCurrent { Image(systemName: "checkmark").foregroundStyle(.teal) }
+                                         else { Image(systemName: "chevron.right").font(.caption) }
+                                     }.padding(.vertical, 6)
+--- baseline/Webcast/Views/ContentView.swift
++++ current/Webcast/Views/ContentView.swift
+@@ -87,9 +87,10 @@
+         .onChange(of: sheet) { if $0 == nil { pendingCast.cancel() } }
+         .onChange(of: tab) { UserDefaults.standard.set($0, forKey: SettingsKeys.lastTab) }
+         .onReceive(cast.loadEvents) { browser.handleCastLoad($0) }
++        .onReceive(cast.pendingCastCancellations) { pendingCast.cancel() }
+         .onChange(of: scenePhase) { phase in
+-            if phase == .active { cast.refreshSession() }
+-            else { browser.cancelDialogs() }
++            if phase == .active { cast.refreshSession(); cast.beginForegroundRecoveryWait() }
++            else { browser.cancelDialogs(); cast.suspendConnectionWait() }
+         }
+         .castErrorAlert()
+     }
+--- baseline/Tests/Swift/BrowserRegressionTests.swift
++++ current/Tests/Swift/BrowserRegressionTests.swift
+@@ -74,6 +74,14 @@
+         }
+     }
+ 
++    @MainActor private func isolatedJavaScript(_ view: WKWebView, _ source: String) async throws -> Any? {
++        try await withCheckedThrowingContinuation { continuation in
++            view.callAsyncJavaScript(source, arguments:[:], in:nil, in:.defaultClient) { result in
++                continuation.resume(with:result)
++            }
++        }
++    }
++
+     @MainActor private func candidateURLs(_ browser: BrowserModel) -> Set<String> {
+         Set(browser.sniffer.candidates.map(\.url.absoluteString))
+     }
+@@ -329,12 +337,12 @@
+                 candidateURLs(browser) == ["https://cdn.example/\(index).mp4"]
+             }
+             if !previousGeneration.isEmpty {
+-                _ = try await browser.webView.evaluateJavaScript("""
++                _ = try await isolatedJavaScript(browser.webView, """
+                 webkit.messageHandlers.videoSniffer.postMessage({generation:'\(previousGeneration)',
+-                  url:'https://cdn.example/stale.mp4', current:true}); true
++                  frameID:'retired-frame', url:'https://cdn.example/stale.mp4', current:true}); return true;
+                 """)
+             }
+-            let value = try await browser.webView.evaluateJavaScript("window.__webcastGeneration")
++            let value = try await isolatedJavaScript(browser.webView, "return window.__webcastGeneration;")
+             previousGeneration = try XCTUnwrap(value as? String)
+         }
+         // A final bridge round trip also drains earlier stale-message deliveries.
+--- baseline/project.yml
++++ current/project.yml
+@@ -41,7 +41,7 @@
+         CFBundleDisplayName: Webcast
+         CFBundleDevelopmentRegion: zh_CN
+         CFBundleShortVersionString: "0.1.2"
+-        CFBundleVersion: "3"
++        CFBundleVersion: "4"
+         WebcastBuildConfiguration: $(CONFIGURATION)
+         ITSAppUsesNonExemptEncryption: false
+         LSRequiresIPhoneOS: true
+@@ -83,6 +83,18 @@
+     settings:
+       base:
+         GENERATE_INFOPLIST_FILE: YES
++  WebcastReceiverTests:
++    type: bundle.unit-test
++    platform: iOS
++    deploymentTarget: "17.0"
++    sources: [Tests/Receiver]
++    dependencies:
++      - target: Webcast
++      - package: GoogleCast
++        product: GoogleCastDynamic
++    settings:
++      base:
++        GENERATE_INFOPLIST_FILE: YES
+ schemes:
+   Webcast:
+     build:
+@@ -100,3 +112,14 @@
+         WEBCAST_OFFLINE_VALIDATION: "1"
+       targets:
+         - WebcastTests
++  WebcastReceiverAcceptance:
++    build:
++      targets:
++        Webcast: all
++        WebcastReceiverTests: [test]
++    test:
++      config: Debug
++      environmentVariables:
++        WEBCAST_OFFLINE_VALIDATION: "1"
++      targets:
++        - WebcastReceiverTests

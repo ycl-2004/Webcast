@@ -9,7 +9,8 @@ xcuserdata/
 .pi/
 Webcast.xcodeproj/
 artifacts/private/
-artifacts/*.log
+artifacts/**/*.log
+artifacts/**/*.xcresult/
 artifacts/Release/
 Config/*.local.xcconfig
 .device.mk
